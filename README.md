@@ -2,14 +2,6 @@
 
 [![CI](https://github.com/CiprianRad/Davenport_Project/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/CiprianRad/Davenport_Project/actions/workflows/lean_action_ci.yml)
 
-A Lean 4 / Mathlib formalization of
-
-> Claudiu G. Pop, George C. Rad and George C. Țurcaș, *Integral zero-sum incidence identities and
-> Davenport constants in rank three*, manuscript, 2026.
-
-Every result of the paper listed below is proved, including the finite computations of Lemmas 5.1
-and 5.3. No `sorry` remains.
-
 ## Results
 
 | Paper | Lean declaration (namespace `DavenportProject`) | File |
