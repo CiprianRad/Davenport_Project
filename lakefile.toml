@@ -1,0 +1,25 @@
+name = "Davenport_Project"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["DavenportProject"]
+
+[leanOptions]
+pp.unicode.fun = true # pretty-prints `fun a ↦ b`
+autoImplicit = false
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+maxSynthPendingDepth = 3
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "d6b19107529f14ba04640221cf560d767c81c8e9"
+
+[[lean_lib]]
+name = "DavenportProject"
+
+# Native computations of Lemma 5.3. Mathlib-free and compiled to native
+# code, so that `native_decide` runs them at native speed.
+[[lean_lib]]
+name = "DavenportCompute"
+precompileModules = true
