@@ -1,15 +1,11 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
 public import DavenportProject.Defs
-public import Mathlib.Algebra.MvPolynomial.Degrees
-public import Mathlib.Algebra.MvPolynomial.Eval
-public import Mathlib.Algebra.Order.BigOperators.Group.Finset
-public import Mathlib.GroupTheory.Exponent
 import DavenportProject.Identities.Duality
 import DavenportProject.Identities.Evaluation
 import DavenportProject.Identities.Operations
@@ -25,13 +21,17 @@ import Mathlib.Logic.Equiv.Fin.Basic
   over `K`, defined from `exists_length_without_separator` and characterized by `kappa_eq_iff`.
 -/
 
-public section
+@[expose] public section
 
 namespace DavenportProject
 
 open Finset
 
+-- Not used below, but it fixes the universe names of `davenport` and `kappa`, which enter their
+-- hashes in `statements.json`.
 variable {G : Type*} [AddCommGroup G] {ι : Type*}
+
+/-! ## The Davenport constant `D(G)` -/
 
 /-- Every long enough sequence has a zero set; this makes `davenport` well defined. -/
 theorem exists_length_forcing_zeroSet (G : Type*) [AddCommGroup G] [Finite G] :
@@ -43,7 +43,7 @@ theorem exists_length_forcing_zeroSet (G : Type*) [AddCommGroup G] [Finite G] :
   obtain ⟨a, b, hab, he⟩ := Fintype.exists_ne_map_eq_of_card_lt s (by simp)
   -- reduce to `j < k` with `s j = s k`
   have key : ∀ j k : Fin (Fintype.card G + 1), j < k → s j = s k →
-      ∃ E, DavenportProject.IsZeroSet u E := by
+      ∃ E, IsZeroSet u E := by
     intro j k hjk hjk'
     refine ⟨univ.filter fun i : Fin (Fintype.card G) => j.val ≤ i.val ∧ i.val < k.val, ?_, ?_⟩
     · have hj : j.val < Fintype.card G := by omega
@@ -61,41 +61,11 @@ theorem exists_length_forcing_zeroSet (G : Type*) [AddCommGroup G] [Finite G] :
   · exact key a b h he
   · exact key b a h he.symm
 
-end DavenportProject
-
-end
-
-@[expose] public section
-
-namespace DavenportProject
-
-open Finset
-
-variable {G : Type*} [AddCommGroup G] {ι : Type*}
-
 open Classical in
 /-- The *Davenport constant* `D(G)`: the least `L` such that every sequence of `L` terms
 over `G` has a nonempty zero-sum subsequence. -/
 noncomputable def davenport (G : Type*) [AddCommGroup G] [Finite G] : ℕ :=
   Nat.find (exists_length_forcing_zeroSet G)
-
-end DavenportProject
-
-end
-
-/-!
-## Proof of the characterization of D(G)
-
-Proves the characterization of `DavenportProject.davenport` as the least forcing length.
--/
-
-public section
-
-namespace DavenportProject
-
-open Finset
-
-variable {G : Type*} [AddCommGroup G] {ι : Type*}
 
 /-- Characterization of `davenport`: every sequence of `L` terms has a zero set, and `L` is the
 least such length. -/
@@ -107,6 +77,8 @@ theorem davenport_eq_iff (G : Type*) [AddCommGroup G] [Finite G] (L : ℕ) :
   unfold davenport
   rw [Nat.find_eq_iff]
   simp only [not_forall, not_exists]
+
+/-! ## The invariant `κ_t(G;K)` -/
 
 /-- Every short enough sequence has a separator; this makes `kappa` well defined. -/
 theorem exists_length_without_separator (G : Type*) [AddCommGroup G] [Finite G]
@@ -131,42 +103,12 @@ theorem exists_length_without_separator (G : Type*) [AddCommGroup G] [Finite G]
   exact (hasIncidenceIdentity_iff_not_hasSeparator K u t).mp
     ⟨_, IsIncidenceIdentity.intCast K hc⟩
 
-end DavenportProject
-
-end
-
-@[expose] public section
-
-namespace DavenportProject
-
-open Finset
-
-variable {G : Type*} [AddCommGroup G] {ι : Type*}
-
 open Classical in
 /-- `κ_t(G;K)`: the least `N` such that no sequence of `N` terms over `G` has a separator of
 degree `t` over `K`. -/
 noncomputable def kappa (G : Type*) [AddCommGroup G] [Finite G] (K : Type*) [Field K]
     (t : ℕ) : ℕ :=
   Nat.find (exists_length_without_separator G K t)
-
-end DavenportProject
-
-end
-
-/-!
-## Proof of the characterization of κ_t(G;K)
-
-Proves the characterization of `DavenportProject.kappa` as the least separator-free length.
--/
-
-public section
-
-namespace DavenportProject
-
-open Finset
-
-variable {G : Type*} [AddCommGroup G] {ι : Type*}
 
 /-- Characterization of `kappa`: no sequence of `L` terms has a separator of degree `t`, and `L`
 is the least such length. -/
@@ -181,5 +123,3 @@ theorem kappa_eq_iff (G : Type*) [AddCommGroup G] [Finite G] (K : Type*) [Field 
   simp only [not_forall, not_not]
 
 end DavenportProject
-
-end

@@ -1,13 +1,11 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
 public import DavenportProject.Defs
-public import Mathlib.Algebra.MvPolynomial.Degrees
-public import Mathlib.Algebra.MvPolynomial.Eval
 
 /-!
 # Lemma 2.1(1) and (2)
@@ -19,6 +17,12 @@ public import Mathlib.Algebra.MvPolynomial.Eval
   commutative ring.
 -/
 
+public section
+
+namespace DavenportProject
+
+open Finset MvPolynomial
+
 /-!
 ## Evaluating polynomials at indicator vectors of finite sets
 
@@ -27,11 +31,7 @@ finite set gives `[supp m ⊆ E]`, and the number of variables occurring in a mo
 its degree.
 -/
 
-public section
-
-namespace DavenportProject.Identities
-
-open Finset MvPolynomial
+namespace Identities
 
 variable {R : Type*} [CommSemiring R] {ι : Type*}
 
@@ -70,21 +70,11 @@ theorem totalDegree_prod_X_le (J : Finset ι) :
   rw [X]
   exact (totalDegree_monomial_le _ _).trans (by simp)
 
-end DavenportProject.Identities
-
-end
-
-public section
-
-namespace DavenportProject
-
-open Finset MvPolynomial
-open DavenportProject.Identities
-
-open Finset
+end Identities
 
 variable {G : Type*} [AddCommGroup G] {ι : Type*}
 
+open Identities in
 /-- **Lemma 2.1(1)**: `c` is an `𝓘_t`-identity over `R` iff
 `∑_E c_E P(𝟙_E) = P(0)` for every polynomial `P` of degree at most `t`. -/
 theorem isIncidenceIdentity_iff_eval {R : Type*} [CommRing R] [Fintype ι] (u : ι → G)
@@ -142,19 +132,6 @@ theorem isIncidenceIdentity_iff_eval {R : Type*} [CommRing R] [Fintype ι] (u : 
         rw [ite_eq_right_of_eq_false _ _ (eq_false hJE), ite_eq_right_of_eq_false _ _ (eq_false h'),
           mul_zero]
 
-end DavenportProject
-
-end
-
-public section
-
-namespace DavenportProject
-
-open Finset
-open DavenportProject.Identities
-
-variable {G : Type*} [AddCommGroup G] {ι : Type*}
-
 /-- **Lemma 2.1(2)**: an integral `𝓘_t`-identity is an `𝓘_t`-identity
 over every commutative ring, by reduction of the coefficients. -/
 theorem IsIncidenceIdentity.intCast (R : Type*) [CommRing R] [Fintype ι] {u : ι → G}
@@ -172,5 +149,3 @@ theorem IsIncidenceIdentity.intCast (R : Type*) [CommRing R] [Fintype ι] {u : �
     · simp
 
 end DavenportProject
-
-end

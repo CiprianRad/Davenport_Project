@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -10,15 +10,8 @@ public import DavenportProject.Bases.CubeThree.Masks
 /-!
 # Certificate data for Lemma 5.1(1)
 
-Generated data: one certificate for each of the 3,382 normalized ten-term cases, re-checked by the
-kernel in `Bases.CubeThree.IdentityCheck`. Nothing here is trusted.
--/
-
-/-!
-## Certificate data for Lemma 5.1(1) (generated data file, about 7,050 lines)
-
-`certTree` is a balanced binary search tree with one certificate for each of the 3,382
-normalized cases enumerated in `Bases.CubeThree.IdentityCheck`. A case is the list
+Generated data. `certTree` is a balanced binary search tree with one certificate for each of the
+3,382 normalized cases enumerated in `Bases.CubeThree.IdentityCheck`. A case is the list
 `l = [a₉, …, a₄, 3, 3, 1, 1]` of codes, most recent first, and its key is
 `key l = ∑ⱼ l[j] * 27 ^ j`. The certificate `(pos, neg)` lists bit masks over the positions
 of `l.reverse`: 2,209 cases use a disjoint pair `E, F` (`pos = [E, F]`, `neg = [E ∪ F]`),
@@ -7056,5 +7049,3 @@ def certTree : CTree :=
          certTree_63))))))
 
 end DavenportProject.CubeThree.Identity
-
-end

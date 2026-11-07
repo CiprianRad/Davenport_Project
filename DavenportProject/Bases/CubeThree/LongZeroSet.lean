@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -18,6 +18,12 @@ import Mathlib.Tactic.Module
 has a zero set of size at least eleven.
 -/
 
+public section
+
+namespace DavenportProject
+
+open Finset CubeThree
+
 /-!
 ## Allowed supports in `C_3^3`
 
@@ -29,11 +35,7 @@ points, a seven-point allowed set has nonzero sum and an eight-point allowed set
 two terms of `2A` (`rep_of_maximal`).
 -/
 
-@[expose] public section
-
-namespace DavenportProject.CubeThree
-
-open Finset DavenportProject
+namespace CubeThree
 
 theorem add_self_add_self (x : Fin 3 → ZMod 3) : x + x + x = 0 := by
   funext k
@@ -64,12 +66,12 @@ theorem exponent_eq_three : AddMonoid.exponent (Fin 3 → ZMod 3) = 3 := by
 
 /-- An *allowed* support: no zero, no two distinct points with sum zero
 and no three distinct points with sum zero. -/
-def Allowed (A : Finset (Fin 3 → ZMod 3)) : Prop :=
+@[expose] def Allowed (A : Finset (Fin 3 → ZMod 3)) : Prop :=
   0 ∉ A ∧ (∀ x ∈ A, ∀ y ∈ A, x ≠ y → x + y ≠ 0) ∧
     ∀ x ∈ A, ∀ y ∈ A, ∀ z ∈ A, x ≠ y → x ≠ z → y ≠ z → x + y + z ≠ 0
 
 /-- The points of `A`, listed without repetition. -/
-noncomputable def listing (A : Finset (Fin 3 → ZMod 3)) (i : Fin #A) : Fin 3 → ZMod 3 :=
+@[expose] noncomputable def listing (A : Finset (Fin 3 → ZMod 3)) (i : Fin #A) : Fin 3 → ZMod 3 :=
   (A.equivFin.symm i : Fin 3 → ZMod 3)
 
 theorem image_listing (A : Finset (Fin 3 → ZMod 3)) : univ.image (listing A) = A := by
@@ -185,45 +187,6 @@ theorem card_filter_le_two (hu : IsShortZeroFree u) (x : Fin 3 → ZMod 3) :
     show 3 • x = 2 • x + x from succ_nsmul x 2, two_nsmul]
   exact add_self_add_self x
 
-end Sequence
-
-end DavenportProject.CubeThree
-
-end
-
-/-!
-## Proof of Lemma 5.2
-
-## Proof
-
-Let `U` be short-zero-free of length thirteen with support
-`A` and total sum `σ`. Every point occurs at most twice, and `A` is allowed, so by
-Lemma 5.1(2) (through `allowed_spec`) `A` has seven or eight points. It suffices to write `σ` as
-the sum of at most two terms of `U` at distinct positions (`exists_rep`): the complement of
-these positions is a zero set of size at least eleven.
-
-Writing `S₁ ⊆ A` for the points of multiplicity one, `#S₁ + 13 = 2 #A` and
-`σ = 2 σ(A) - σ(S₁)`. A representation of `σ` from `rep_of_maximal` for a maximal allowed set
-is available in `U` unless it uses a point of `S₁` twice; the remaining cases contradict the
-support conditions or Lemma 5.1(2), exactly as in the paper:
-
-* `#A = 8`: `A` is maximal and `σ = -σ(S₁)`; `-σ ∈ S₁` would leave two points of
-  `S₁` with sum zero.
-* `#A = 7`, `S₁ = {a₀}`: if `A` is maximal, `-σ = a₀` forces `σ(A) = 0`;
-  otherwise `A ∪ {b}` is an allowed (hence maximal) eight-set with `σ(A) = -b`, and each
-  unavailable representation forces `a₀ = 0`, `a₀ + b = 0` or `c + a₀ = 0` with `c ∈ A`.
--/
-
-public section
-
-namespace DavenportProject.CubeThree
-
-open Finset DavenportProject
-
-section Rep
-
-variable {N : ℕ} {u : Fin N → (Fin 3 → ZMod 3)}
-
 /-- `x` is a sum of at most two terms of `u` at distinct positions. -/
 def IsRep (u : Fin N → (Fin 3 → ZMod 3)) (x : Fin 3 → ZMod 3) : Prop :=
   ∃ F : Finset (Fin N), #F ≤ 2 ∧ ∑ i ∈ F, u i = x
@@ -248,7 +211,28 @@ theorem isRep_add_self {x : Fin 3 → ZMod 3} (hx : 2 ≤ #{i | u i = x}) : IsRe
   rw [sum_pair hij, (mem_filter.1 (hE (mem_insert_self i _))).2,
     (mem_filter.1 (hE (mem_insert_of_mem (mem_singleton_self j)))).2]
 
-end Rep
+end Sequence
+
+/-!
+## Proof of Lemma 5.2
+
+Let `U` be short-zero-free of length thirteen with support
+`A` and total sum `σ`. Every point occurs at most twice, and `A` is allowed, so by
+Lemma 5.1(2) (through `allowed_spec`) `A` has seven or eight points. It suffices to write `σ` as
+the sum of at most two terms of `U` at distinct positions (`exists_rep`): the complement of
+these positions is a zero set of size at least eleven.
+
+Writing `S₁ ⊆ A` for the points of multiplicity one, `#S₁ + 13 = 2 #A` and
+`σ = 2 σ(A) - σ(S₁)`. A representation of `σ` from `rep_of_maximal` for a maximal allowed set
+is available in `U` unless it uses a point of `S₁` twice; the remaining cases contradict the
+support conditions or Lemma 5.1(2), exactly as in the paper:
+
+* `#A = 8`: `A` is maximal and `σ = -σ(S₁)`; `-σ ∈ S₁` would leave two points of
+  `S₁` with sum zero.
+* `#A = 7`, `S₁ = {a₀}`: if `A` is maximal, `-σ = a₀` forces `σ(A) = 0`;
+  otherwise `A ∪ {b}` is an allowed (hence maximal) eight-set with `σ(A) = -b`, and each
+  unavailable representation forces `a₀ = 0`, `a₀ + b = 0` or `c + a₀ = 0` with `c ∈ A`.
+-/
 
 /-- The heart of Lemma 5.2: the total sum of a short-zero-free sequence of thirteen terms over
 `C_3^3` is a sum of at most two of its terms. -/
@@ -370,18 +354,7 @@ theorem exists_rep {u : Fin 13 → (Fin 3 → ZMod 3)} (hu : IsShortZeroFree u) 
       exact h2 c hc d hd hcd hsum
     exact good hS (rep_of_maximal hA (hmax8 hA8) σ)
 
-end DavenportProject.CubeThree
-
-end
-
-public section
-
-namespace DavenportProject
-
-open Finset DavenportProject
-open DavenportProject.CubeThree
-
-open Finset
+end CubeThree
 
 /-- **Lemma 5.2**: every short-zero-free sequence of thirteen terms over
 `C_3^3` has a zero set of size at least eleven. -/
@@ -396,5 +369,3 @@ theorem exists_large_zeroSet_cube_three (u : Fin 13 → (Fin 3 → ZMod 3))
   rw [← sub_eq_zero.2 hsum.symm, eq_sub_iff_add_eq, sum_sdiff (subset_univ F)]
 
 end DavenportProject
-
-end

@@ -1,18 +1,14 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
 public meta import DavenportCompute.Oracle
 
 /-!
-# Lemma 5.3(1): native check, chunk 4 of chunks 0–5
--/
-
-/-!
-## Native check: Lemma 5.3(1), chunk 4 (chunks 0–5)
+# Lemma 5.3(1): native check, chunk 4 of 6
 
 The enumeration of normalized short-zero-free 14-term code lists passes the leaf test `leaf14`
 below every prefix of depth four in chunk 4 of 6.
@@ -32,5 +28,3 @@ theorem chunk14_4 : (chunk 6 4 (prefixes 4)).all (gdfsFrom leaf14 10) = true := 
   native_decide
 
 end DavenportProject.CubeFour.Checks
-
-end

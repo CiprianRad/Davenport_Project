@@ -1,13 +1,11 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
-public import DavenportProject.Defs
 public import DavenportProject.Invariants
-public import Mathlib.Data.ZMod.Basic
 import DavenportProject.Bases.CubeFour
 import DavenportProject.Bases.CubeThree
 import DavenportProject.Bases.CubeTwo
@@ -30,7 +28,9 @@ bound of Proposition 4.1, `le_kappa_cube`).
 
 public section
 
-namespace DavenportProject.Bases
+namespace DavenportProject
+
+namespace Bases
 
 variable {G : Type*} [AddCommGroup G]
 
@@ -48,11 +48,7 @@ theorem kappa_le_of_forall_hasIncidenceIdentity [Finite G] (K : Type*) [Field K]
   obtain ⟨c, hc⟩ := h u
   exact (hasIncidenceIdentity_iff_not_hasSeparator K u t).mp ⟨_, hc.intCast K⟩ hsep
 
-end DavenportProject.Bases
-
-namespace DavenportProject
-
-open Finset
+end Bases
 
 /-- **Theorem B**, first sentence: for `m ∈ {2,3,4}` and `t ≥ 0`, every
 indexed sequence of `m(t+3) - 2` terms over `C_m^3` has an integral `𝓘_t`-identity. -/
@@ -80,5 +76,3 @@ theorem kappa_cube_eq (m : ℕ) [NeZero m] (hm : m = 2 ∨ m = 3 ∨ m = 4) (t :
   exact le_antisymm (kappa_cube_le m hm t K) (le_kappa_cube m h2 t K hK)
 
 end DavenportProject
-
-end

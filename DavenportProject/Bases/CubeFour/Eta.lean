@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -10,7 +10,6 @@ public import Mathlib.Data.ZMod.Basic
 import DavenportProject.Bases.Basic
 import DavenportProject.Bases.CubeTwo
 import DavenportProject.Identities.Operations
-import DavenportProject.Invariants
 
 /-!
 # Short zero sets over `C_4^3`
@@ -20,6 +19,12 @@ import DavenportProject.Invariants
 * The reductions used for Lemma 5.3 and Theorem B: a zero set of size at most four
   (`exists_isZeroSet_card_le_four_of_le_card`) and degree zero (`D(C_4^3) = 10`).
 -/
+
+@[expose] public section
+
+namespace DavenportProject
+
+open Finset Bases
 
 /-!
 ## Proof of η(C_4^3) ≤ 22
@@ -37,11 +42,7 @@ Structural proof of `η(C_4^3) ≤ 22` (instead of the citation of Harborth 1973
   this is a zero set of at most four terms, while `exp(C_4^3) ≥ 4`.
 -/
 
-@[expose] public section
-
-namespace DavenportProject.CubeFour
-
-open Finset DavenportProject DavenportProject.Bases
+namespace CubeFour
 
 /-- Reduction mod 2, `C_4^3 → C_2^3`. -/
 def red : (Fin 3 → ZMod 4) →+ (Fin 3 → ZMod 2) :=
@@ -151,19 +152,9 @@ theorem exists_blocks (u : ι → (Fin 3 → ZMod 4)) (k : ℕ) :
         | zero => exact (disjoint_sdiff.mono_right (hb i).1).symm
         | succ j => exact hd i j fun h => hij (by rw [h])
 
-end DavenportProject.CubeFour
+end CubeFour
 
-end
-
-public section
-
-namespace DavenportProject
-
-open Finset DavenportProject DavenportProject.Bases
-open DavenportProject.CubeFour
-
-open Finset
-
+open CubeFour in
 /-- `η(C_4^3) ≤ 22` (Harborth 1973, cited in the paper and proved here): every twenty-two terms
 over `C_4^3` contain a zero set of size at most `exp = 4`. -/
 theorem not_isShortZeroFree_cube_four (u : Fin 22 → (Fin 3 → ZMod 4)) :
@@ -190,20 +181,11 @@ theorem not_isShortZeroFree_cube_four (u : Fin 22 → (Fin 3 → ZMod 4)) :
     exact key (b j) (hb j).2.1 (by have := (hb j).2.2.1; omega)
       (eq_zero_of_half_eq_zero (hb j).2.2.2 hj)
 
-end DavenportProject
-
-end
-
 /-!
 ## Short zero sets and degree zero over `C_4^3`
 -/
 
-public section
-
-namespace DavenportProject.Bases
-
-open Finset DavenportProject
-open DavenportProject.Bases (exponent_fin_three_zmod)
+namespace Bases
 
 /-- Twenty-two or more terms over `C_4^3` contain a zero set of size at most four. -/
 theorem exists_isZeroSet_card_le_four_of_le_card {ι : Type*} [Fintype ι]
@@ -227,6 +209,6 @@ theorem hasIncidenceIdentity_zero_of_card_eq_ten {ι : Type*} [Fintype ι]
   exact hasIncidenceIdentity_of_pairwise_disjoint u 0 (fun _ => E.map e.symm.toEmbedding)
     (fun _ => hB) (fun i j hij => absurd (Subsingleton.elim (α := Fin 1) i j) hij)
 
-end DavenportProject.Bases
+end Bases
 
-end
+end DavenportProject

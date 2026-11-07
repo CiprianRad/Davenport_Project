@@ -1,20 +1,16 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
-public import DavenportProject.Defs
 public import DavenportProject.Invariants
-public import Mathlib.Data.ZMod.Basic
 public import Mathlib.GroupTheory.PGroup
-public import Mathlib.RingTheory.MvPolynomial.Basic
 import DavenportProject.Identities.Duality
 import DavenportProject.Identities.Evaluation
 import DavenportProject.Transfer.Indicator
 import DavenportProject.Transfer.Olson
-import Mathlib.Algebra.DirectSum.Module
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.GroupTheory.FiniteAbelian.Basic
 
@@ -31,6 +27,14 @@ The proof uses Lemma 3.1, Olson's theorem, Lemma 2.1(3) and the structure theore
 abelian `p`-groups.
 -/
 
+public section
+
+namespace DavenportProject
+
+open Transfer
+
+namespace Transfer
+
 /-!
 ## Basic API for the Davenport constant
 
@@ -39,12 +43,6 @@ Consequences of the characterization `davenport_eq_iff`:
 * `exists_isZeroSet_of_davenport_le`: if `D(G) ≤ N`, every `N`-term sequence has a zero set;
 * `davenport_congr`: the Davenport constant is invariant under additive isomorphisms.
 -/
-
-public section
-
-namespace DavenportProject.Transfer
-
-open Finset DavenportProject
 
 variable {G G' : Type*} [AddCommGroup G] [Finite G] [AddCommGroup G'] [Finite G']
 
@@ -83,10 +81,6 @@ theorem davenport_congr (e : G ≃+ G') : davenport G = davenport G' := by
     obtain ⟨E, hE⟩ := exists_isZeroSet_of_davenport_le le_rfl (fun i => e.symm (u i))
     exact ⟨E, (isZeroSet_comp_iff e.symm u E).1 hE⟩
 
-end DavenportProject.Transfer
-
-end
-
 /-!
 ## Structure of finite abelian `p`-groups
 
@@ -94,12 +88,6 @@ A finite abelian `p`-group `H` is additively isomorphic to `∏_{i : Fin r} ZMod
 (`exists_addEquiv_pi_zmod_prime_pow`). Combined with Olson's theorem this gives
 `D(H) - 1 = ∑ i, (p ^ a i - 1)` (`exists_addEquiv_pi_zmod_prime_pow_davenport`).
 -/
-
-public section
-
-namespace DavenportProject.Transfer
-
-open Finset DavenportProject
 
 /-- **Structure of finite abelian `p`-groups**: a finite abelian `p`-group is additively
 isomorphic to `∏_{i : Fin r} ZMod (p ^ a i)` for some `r` and `a`. -/
@@ -145,18 +133,7 @@ theorem exists_addEquiv_pi_zmod_prime_pow_davenport {p : ℕ} [Fact p.Prime] {H 
   refine ⟨r, a, ⟨e⟩, ?_⟩
   rw [davenport_congr e, davenport_pi_zmod_prime_pow p a, Nat.add_sub_cancel_left]
 
-end DavenportProject.Transfer
-
-end
-
-public section
-
-namespace DavenportProject
-
-open Finset DavenportProject
-open DavenportProject.Transfer
-
-open Finset
+end Transfer
 
 /-- **Theorem A** (transfer principle): if every sequence of `L(t)` terms
 over `Q` has an `𝓘_t`-identity over `𝔽_p`, then `D(Q ⊕ H) ≤ L(D(H) - 1)` for every finite
@@ -188,18 +165,6 @@ theorem davenport_prod_le_of_hasIncidenceIdentity_zmod (Q : Type*) [AddCommGroup
     · rw [Prod.snd_sum]
       exact hsum
 
-end DavenportProject
-
-end
-
-public section
-
-namespace DavenportProject
-
-open DavenportProject.Transfer
-
-open Finset
-
 /-- Theorem A, last sentence: if the identities are integral, the
 conclusion holds for every prime `p`. -/
 theorem davenport_prod_le_of_hasIncidenceIdentity_int (Q : Type*) [AddCommGroup Q]
@@ -211,5 +176,3 @@ theorem davenport_prod_le_of_hasIncidenceIdentity_int (Q : Type*) [AddCommGroup 
     (fun t u => (hL t u).elim fun _ hc => ⟨_, hc.intCast (ZMod p)⟩) H hH
 
 end DavenportProject
-
-end

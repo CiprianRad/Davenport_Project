@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -13,21 +13,20 @@ Orbit representatives of the hard fourteen- and eighteen-term cases with certifi
 case, so nothing here is trusted.
 -/
 
+@[expose] public section
+
+namespace DavenportCompute
+
 /-!
-## Orbit representatives for Lemma 5.3(1) with certificates (generated data, untrusted)
+## Orbit representatives for Lemma 5.3(1)
 
 The 6,963 orbits of hard fourteen-term cases: 6,955 certificates with five zero sets and
 coefficients `±1`, and eight found by the integer solver (see `scripts/l53/`).
 Each line is `c₀ … c₁₃ | m₁ k₁ m₂ k₂ …`: a sorted list of codes (the least sorted image of its
 orbit under the maps sending three support entries to the standard basis) and an integral
-`𝓘_1`-certificate, pairs of a bit mask over its positions and a coefficient. Nothing here is
-trusted: every certificate is re-checked by `DavenportCompute.check` after transport. The table is
-split into blocks of 100 lines.
+`𝓘_1`-certificate, pairs of a bit mask over its positions and a coefficient. The table is split
+into blocks of 100 lines.
 -/
-
-@[expose] public section
-
-namespace DavenportCompute
 
 /-- Block 0 of the table (generated). -/
 def data14_0 : String :=
@@ -7220,24 +7219,15 @@ def data14 : String := String.join
    data14_57, data14_58, data14_59, data14_60, data14_61, data14_62, data14_63, data14_64,
    data14_65, data14_66, data14_67, data14_68, data14_69]
 
-end DavenportCompute
-
-end
-
 /-!
-## Orbit representatives for Lemma 5.3(2) with certificates (generated data, untrusted)
+## Orbit representatives for Lemma 5.3(2)
 
 The 64 orbits of hard eighteen-term cases, each with eleven zero sets and coefficients
 `±1` (built from a zero set `B` and a five-set `𝓘_1`-certificate off `B`, Lemma 2.2(2)).
 Each line is `c₀ … c_{n-1} | m₁ k₁ m₂ k₂ …`: a sorted list of codes (the least sorted image of
 its orbit under the maps sending three support entries to the standard basis) and an integral
-`𝓘_2`-certificate, pairs of a bit mask over its positions and a coefficient. Nothing here is
-trusted: every certificate is re-checked by `DavenportCompute.check` after transport.
+`𝓘_2`-certificate, pairs of a bit mask over its positions and a coefficient.
 -/
-
-@[expose] public section
-
-namespace DavenportCompute
 
 /-- The table (generated). -/
 def data18 : String :=
@@ -7371,5 +7361,3 @@ def data18 : String :=
   -1 99199 -1 48006 -1 85766 -1 48127 1 85887 1"
 
 end DavenportCompute
-
-end

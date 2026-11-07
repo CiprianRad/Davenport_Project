@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -29,6 +29,12 @@ Soundness of the computation library `DavenportCompute` used for Lemma 5.3:
 * soundness of the certificate checker (`hasIncidenceIdentity_of_check`, `longZero_sound`).
 -/
 
+@[expose] public section
+
+namespace DavenportProject.CubeFour
+
+open Finset DavenportCompute
+
 /-!
 ## Shared definitions for the proof of Lemma 5.3
 
@@ -47,12 +53,6 @@ Code level (lists of codes `< 64`, see `DavenportCompute.Basic`):
   `16 ∈ F` unless no entry satisfies `P3`.
 -/
 
-@[expose] public section
-
-namespace DavenportProject.CubeFour
-
-open Finset DavenportCompute
-
 /-- `2x ≠ 0`: some coordinate of `x` is odd. -/
 def P1g (x : Fin 3 → ZMod 4) : Prop := 2 • x ≠ 0
 
@@ -69,7 +69,7 @@ noncomputable def mult {ι : Type*} [Fintype ι] (v : ι → (Fin 3 → ZMod 4))
     ℕ := by
   classical exact #{i | v i = x}
 
-/-- The normalization used by the enumeration (see the module docstring). -/
+/-- The normalization used by the enumeration (see the section docstring). -/
 def IsNormal {ι : Type*} [Fintype ι] (v : ι → (Fin 3 → ZMod 4)) : Prop :=
   ((∃ i, v i = Pi.single 0 1) ∨ ∀ i, ¬ P1g (v i)) ∧
     (∀ x, P1g x → mult v x ≤ mult v (Pi.single 0 1)) ∧
@@ -87,10 +87,6 @@ def Guards (F : List ℕ) : Prop :=
   (1 ∈ F ∨ ∀ y ∈ F, P1 y = false) ∧ (4 ∈ F ∨ ∀ y ∈ F, P2 y = false) ∧
     (16 ∈ F ∨ ∀ y ∈ F, P3 y = false)
 
-end DavenportProject.CubeFour
-
-end
-
 /-!
 ## Semantics of the bit sets and sum sets of the Lemma 5.3 computation
 
@@ -102,14 +98,8 @@ of the enumeration (`DavenportProject.Bases.CubeFour.Enumeration`):
 * bit sets: `mem_or`, `mem_bit`, and `mem_shiftSet` (the translate `S + x`);
 * sum sets: every member of `R1 p`, `R2 p`, `R3 p` is the code sum of a sublist of `p` of length
   `1`, `2`, `3` (`mem_R1_iff`, `exists_sublist_of_mem_R2`, `exists_sublist_of_mem_R3`);
-* `allFrom_eq_true_iff` and `mem_chunk`.
+* the loop `allFrom` (`allFrom_eq_true_iff`).
 -/
-
-public section
-
-namespace DavenportProject.CubeFour
-
-open DavenportCompute
 
 /-! ### Code arithmetic -/
 
@@ -171,11 +161,6 @@ theorem add4_neg4 (a : ℕ) : add4 a (neg4 a) = 0 := by
 theorem add4_zero {a : ℕ} (ha : a < 64) : add4 a 0 = a := by
   rw [add4_eq]
   omega
-
-theorem codeSum_lt (q : List ℕ) : codeSum q < 64 := by
-  cases q with
-  | nil => decide
-  | cons x q => exact add4_lt _ _
 
 theorem codeSum_singleton {a : ℕ} (ha : a < 64) : codeSum [a] = a := add4_zero ha
 
@@ -306,7 +291,7 @@ theorem exists_sublist_of_mem_R3 {p : List ℕ} (hp : ∀ y ∈ p, y < 64) {s : 
       refine ⟨x :: q, hq.cons_cons x, by simp [hl], ?_⟩
       rw [codeSum, hsum, add4_comm]
 
-/-! ### Loops and chunks -/
+/-! ### Loops -/
 
 /-- `allFrom f x n` tests `f` on the interval `[x, x + n)`. -/
 theorem allFrom_eq_true_iff {f : ℕ → Bool} {x n : ℕ} :
@@ -326,17 +311,6 @@ theorem allFrom_eq_true_iff {f : ℕ → Bool} {x n : ℕ} :
     · intro h
       exact ⟨h x (Nat.le_refl x) (by omega), fun y hy₁ hy₂ => h y (by omega) (by omega)⟩
 
-/-- Every prefix lies in the chunk given by its `mix` value. -/
-theorem mem_chunk {P : List (List ℕ)} {p : List ℕ} (hp : p ∈ P) {k : ℕ} (hk : 0 < k) :
-    p ∈ chunk k (mix p % k) P ∧ mix p % k < k := by
-  refine ⟨?_, Nat.mod_lt _ hk⟩
-  unfold chunk
-  exact List.mem_filter.2 ⟨hp, by simp⟩
-
-end DavenportProject.CubeFour
-
-end
-
 /-!
 ## Codes of elements of `C_m^3`
 
@@ -349,19 +323,13 @@ addition and summation (`dec_add4`, `dec_codeSum`), the tests `P1`, `P2`, `P3` d
 sequence has no zero set of size at most four (`listSZF_ofFn`).
 -/
 
-@[expose] public section
-
-namespace DavenportProject.CubeFour
-
-open Finset DavenportCompute
-
 /-- Decode the code `a = x₀ + m x₁ + m² x₂` into an element of `C_m^3 = Fin 3 → ZMod m`. -/
 def dec (m a : ℕ) : Fin 3 → ZMod m := fun i => (DavenportCompute.digit m a i : ZMod m)
 
 /-- Encode an element of `C_m^3` as `x₀ + m x₁ + m² x₂`. -/
 def enc (m : ℕ) (x : Fin 3 → ZMod m) : ℕ := (x 0).val + m * (x 1).val + m * m * (x 2).val
 
-/-! ## Decoding and encoding -/
+/-! ### Decoding and encoding -/
 
 /-- The digits of `enc m x` are the coordinates of `x`. -/
 theorem digit_enc {m : ℕ} [NeZero m] (x : Fin 3 → ZMod m) (i : Fin 3) :
@@ -441,16 +409,7 @@ theorem dec_codeSum (q : List ℕ) : dec 4 (codeSum q) = (q.map (dec 4)).sum := 
   | nil => simp [codeSum, dec_zero]
   | cons x p ih => simp [codeSum, dec_add4, ih]
 
-/-- The only code decoding to `0` is `0`. -/
-theorem dec_eq_zero_iff {a : ℕ} (h : a < 64) : dec 4 a = 0 ↔ a = 0 := by
-  constructor
-  · intro h0
-    rw [← enc_dec h, h0]
-    simp [enc]
-  · rintro rfl
-    exact dec_zero 4
-
-/-! ## The tests `P1`, `P2`, `P3` -/
+/-! ### The tests `P1`, `P2`, `P3` -/
 
 theorem two_nsmul_eq_two_nsmul_iff (x y : Fin 3 → ZMod 4) :
     2 • x = 2 • y ↔ 2 * x 0 = 2 * y 0 ∧ 2 * x 1 = 2 * y 1 ∧ 2 * x 2 = 2 * y 2 := by
@@ -507,7 +466,7 @@ theorem enc_e1 : enc 4 (Pi.single 1 1) = 4 := by decide
 /-- The code of `e₂`. -/
 theorem enc_e2 : enc 4 (Pi.single 2 1) = 16 := by decide
 
-/-! ## Short zero sets -/
+/-! ### Short zero sets -/
 
 /-- If the decoded sequence has no zero set of size at most four, then no nonempty sublist of
 length at most four of the code list has code sum zero. -/
@@ -536,10 +495,6 @@ theorem listSZF_ofFn {N : ℕ} (c : Fin N → ℕ) (hc : ∀ i, c i < 64)
   simp only [card_map, card_univ, Fintype.card_fin] at this
   omega
 
-end DavenportProject.CubeFour
-
-end
-
 /-!
 ## Soundness of the certificate checker
 
@@ -551,12 +506,6 @@ end
 * `longZero_sound`: if `DavenportCompute.longZero (List.ofFn f) Z = true`, then `toSet N Z` is a
   zero set of the decoded sequence with at least fifteen elements.
 -/
-
-@[expose] public section
-
-namespace DavenportProject.CubeFour
-
-open Finset DavenportCompute
 
 /-- The index set encoded by a mask. -/
 def toSet (N E : ℕ) : Finset (Fin N) := Finset.univ.filter fun j => E.testBit j
@@ -652,7 +601,7 @@ theorem hasIncidenceIdentity_of_check {m N t : ℕ} (f : Fin N → ℕ) (cert : 
       obtain ⟨x, rfl⟩ := Finset.card_eq_one.mp (show #J = 1 by omega)
       simpa [coeffSum, mem_toSet] using h1' x x.2
 
-/-! ## Long zero sets -/
+/-! ### Long zero sets -/
 
 theorem countP_range_eq_sum (p : ℕ → Bool) (n : ℕ) :
     (List.range n).countP p = ∑ i ∈ Finset.range n, if p i then 1 else 0 := by
@@ -675,5 +624,3 @@ theorem longZero_sound {N : ℕ} (f : Fin N → ℕ) {Z : ℕ}
   exact ⟨isZeroSet_of_isZeroMask f h.1, (card_toSet N Z).symm ▸ h.2⟩
 
 end DavenportProject.CubeFour
-
-end

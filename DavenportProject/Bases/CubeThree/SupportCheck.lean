@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -10,14 +10,8 @@ public import DavenportProject.Bases.CubeThree.Masks
 /-!
 # Kernel check for Lemma 5.1(2)
 
-The finite enumeration behind Lemma 5.1(2), evaluated by the kernel (`decide +kernel`).
--/
-
-/-!
-## Kernel-checked enumeration for Lemma 5.1(2)
-
-`checkFrom` (defined in `Masks.lean`) is evaluated by the kernel (`decide +kernel`), one
-declaration per first point `a` (26 declarations).
+The finite enumeration behind Lemma 5.1(2): `checkFrom` (defined in `Masks.lean`) is evaluated by
+the kernel (`decide +kernel`), one declaration per first point `a` (26 declarations).
 -/
 
 public section
@@ -58,5 +52,3 @@ theorem checkFrom_25 : checkFrom 25 = true := by decide +kernel
 theorem checkFrom_26 : checkFrom 26 = true := by decide +kernel
 
 end DavenportProject.CubeThree.Support
-
-end

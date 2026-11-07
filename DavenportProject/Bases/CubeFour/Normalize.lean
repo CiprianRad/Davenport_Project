@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -23,6 +23,12 @@ standard basis vectors (or the sequence avoids them). `exists_sortedCodes` then 
 positions and produces the normalized code list that the enumeration of Lemma 5.3 covers.
 -/
 
+public section
+
+namespace DavenportProject.CubeFour
+
+open Finset Matrix DavenportCompute
+
 /-!
 ## Linear normalization for Lemma 5.3
 
@@ -41,12 +47,6 @@ enumeration by an injective additive endomorphism `φ` of `G` (`exists_isNormal`
   determinant is `±` an odd coordinate of `b`, hence a unit. The conditions established by the
   earlier steps survive the later maps (`NormCond.comp`).
 -/
-
-public section
-
-namespace DavenportProject.CubeFour
-
-open Finset Matrix
 
 /-! ### Automorphisms from matrices -/
 
@@ -202,9 +202,11 @@ theorem P3g.exists_addHom {b : Fin 3 → ZMod 4} (hb : P3g b) :
     (by rw [det_e₀_e₁_b]; exact isUnit_of_mul_self hb.mul_self_eq_one)
   exact ⟨φ, hφ, hM 0, hM 1, hM 2⟩
 
-/-! ### Multiplicities -/
+section Normalization
 
 variable {ι : Type*} [Fintype ι]
+
+/-! ### Multiplicities -/
 
 /-- An injective map does not change multiplicities. -/
 theorem mult_comp {φ : (Fin 3 → ZMod 4) → (Fin 3 → ZMod 4)} (hφ : Function.Injective φ)
@@ -298,9 +300,7 @@ theorem exists_isNormal {ι : Type*} [Fintype ι] (u : ι → (Fin 3 → ZMod 4)
   exact ⟨φ₃.comp (φ₂.comp φ₁), hφ₃.comp (hφ₂.comp hφ₁),
     hC₁'.1, hC₁'.2, hC₂'.1, hC₂'.2, hC₃.1, hC₃.2⟩
 
-end DavenportProject.CubeFour
-
-end
+end Normalization
 
 /-!
 ## From a short-zero-free sequence over `C_4^3` to a normalized sorted code list
@@ -313,12 +313,6 @@ enumeration (`Guards`) and the multiplicity normalization (`n3cond`).
 
 `hasIncidenceIdentity_of_sortedCodes` moves an identity of `dec 4 ∘ c` back to `u`.
 -/
-
-public section
-
-namespace DavenportProject.CubeFour
-
-open Finset DavenportProject DavenportCompute
 
 /-- The count of `a` in `List.ofFn c` is the number of positions where `c` takes the value `a`. -/
 theorem count_ofFn {N : ℕ} (c : Fin N → ℕ) (a : ℕ) :
@@ -336,7 +330,7 @@ theorem enc_ne_zero_of_szf {ι : Type*} {u : ι → (Fin 3 → ZMod 4)}
   have := hu {i} ⟨⟨i, mem_singleton_self i⟩, by simp [h0]⟩
   simp at this
 
-/-- A short-zero-free sequence becomes a normalized sorted code list (see the module docstring). -/
+/-- A short-zero-free sequence becomes a normalized sorted code list (see the section docstring). -/
 theorem exists_sortedCodes {N : ℕ} (u : Fin N → (Fin 3 → ZMod 4))
     (hu : ∀ E : Finset (Fin N), IsZeroSet u E → 4 < #E) :
     ∃ φ : (Fin 3 → ZMod 4) →+ (Fin 3 → ZMod 4), Function.Injective φ ∧
@@ -377,7 +371,7 @@ theorem exists_sortedCodes {N : ℕ} (u : Fin N → (Fin 3 → ZMod 4))
     exact ⟨Nat.one_le_iff_ne_zero.2 (enc_ne_zero_of_szf hvszf (σ k)), hlt k⟩
   · refine listSZF_ofFn c hlt fun E hE => ?_
     have hE' : IsZeroSet (fun k => v (σ k)) E := by simpa only [hdec] using hE
-    have := hvszf _ ((DavenportProject.isZeroSet_map_equiv v σ E).2 hE')
+    have := hvszf _ ((isZeroSet_map_equiv v σ E).2 hE')
     simpa using this
   · obtain ⟨hA, -, hB, -, hC, -⟩ := hnorm
     have hguard : ∀ (e : Fin 3 → ZMod 4) (P : (Fin 3 → ZMod 4) → Prop) (Q : ℕ → Bool),
@@ -426,10 +420,7 @@ theorem hasIncidenceIdentity_of_sortedCodes {N t : ℕ} {u : Fin N → (Fin 3 �
     {σ : Equiv.Perm (Fin N)} {c : Fin N → ℕ} (hdec : ∀ k, dec 4 (c k) = φ (u (σ k)))
     (h : HasIncidenceIdentity ℤ (fun k => dec 4 (c k)) t) : HasIncidenceIdentity ℤ u t := by
   refine CubeThree.Identity.hasIncidenceIdentity_of_comp φ hφ ?_
-  have h' := DavenportProject.hasIncidenceIdentity_comp_equiv
-    (fun k => dec 4 (c k)) σ.symm h
+  have h' := hasIncidenceIdentity_comp_equiv (fun k => dec 4 (c k)) σ.symm h
   simpa [hdec] using h'
 
 end DavenportProject.CubeFour
-
-end

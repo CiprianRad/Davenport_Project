@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -23,8 +23,6 @@ public section
 
 namespace DavenportProject
 
-open Finset
-
 /-- **Lemma 3.1**: for `H = ⊕_{i} C_{p^{a_i}}` and `M = ∑_i (p^{a_i} - 1)`,
 and arbitrary labels `v_1, …, v_N ∈ H`, the Boolean function `z ↦ 𝟙[∑_j z_j v_j = 0] ∈ 𝔽_p`
 is represented by a multilinear polynomial over `𝔽_p` of degree at most `M`. -/
@@ -39,5 +37,3 @@ theorem exists_multilinear_zeroSum_indicator (p : ℕ) [Fact p.Prime] {r : ℕ} 
   Transfer.exists_multilinear_indicator
 
 end DavenportProject
-
-end

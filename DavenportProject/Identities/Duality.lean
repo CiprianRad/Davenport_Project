@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -15,10 +15,6 @@ import Mathlib.LinearAlgebra.Dual.Lemmas
 
 `hasIncidenceIdentity_iff_not_hasSeparator`: over a field, a sequence has an `𝓘_t`-identity iff it
 has no separator of degree `t` (linear duality).
--/
-
-/-!
-## Proof of Lemma 2.1(3)
 
 The forward direction applies Lemma 2.1(1) to a separator. For the converse, an identity is
 a solution `c` of `∑_E c_E v_E = e` in `Finset ι → K`, where `v_E J = [E ∈ 𝒵(u), #J ≤ t, J ⊆ E]`
@@ -28,11 +24,13 @@ the `v_E` gives the coefficients of a separator `∑_{#J ≤ t} φ_J ∏_{j ∈ 
 
 public section
 
-namespace DavenportProject.Identities
+namespace DavenportProject
 
-open Finset MvPolynomial
+open Finset MvPolynomial Identities
 
 variable {G : Type*} [AddCommGroup G] {ι : Type*}
+
+namespace Identities
 
 /-- Evaluating a product of distinct variables at the indicator of `E` gives `[J ⊆ E]`. -/
 theorem eval_indicator_prod_X {K : Type*} [CommSemiring K] (E J : Finset ι)
@@ -49,20 +47,7 @@ theorem eval_indicator_prod_X {K : Type*} [CommSemiring K] (E J : Finset ι)
   · have h' : ¬∀ i ∈ J, i ∈ E := fun h' => h fun i hi => h' i hi
     rw [ite_eq_right_of_eq_false _ _ (eq_false h'), ite_eq_right_of_eq_false _ _ (eq_false h)]
 
-end DavenportProject.Identities
-
-end
-
-public section
-
-namespace DavenportProject
-
-open Finset MvPolynomial
-open DavenportProject.Identities
-
-open Finset
-
-variable {G : Type*} [AddCommGroup G] {ι : Type*}
+end Identities
 
 /-- **Lemma 2.1(3)**: over a field, `u` has an `𝓘_t`-identity iff it
 has no separator of degree `t`. -/
@@ -72,7 +57,7 @@ theorem hasIncidenceIdentity_iff_not_hasSeparator (K : Type*) [Field K] [Fintype
   classical
   constructor
   · rintro ⟨c, hc⟩ ⟨P, hdeg, h0, hE⟩
-    have key := (DavenportProject.isIncidenceIdentity_iff_eval u t c).1 hc P hdeg
+    have key := (isIncidenceIdentity_iff_eval u t c).1 hc P hdeg
     rw [h0, Finset.sum_eq_zero] at key
     · exact zero_ne_one key
     · intro E hE'
@@ -148,5 +133,3 @@ theorem hasIncidenceIdentity_iff_not_hasSeparator (K : Type*) [Field K] [Fintype
       rw [hev, hnum, zero_div]
 
 end DavenportProject
-
-end

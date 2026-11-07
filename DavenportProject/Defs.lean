@@ -1,13 +1,11 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
 public import Mathlib.Algebra.MvPolynomial.Degrees
-public import Mathlib.Algebra.MvPolynomial.Eval
-public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 public import Mathlib.GroupTheory.Exponent
 
 /-!
@@ -36,18 +34,6 @@ variable {G : Type*} [AddCommGroup G] {ι : Type*}
 def IsZeroSet (u : ι → G) (E : Finset ι) : Prop :=
   E.Nonempty ∧ ∑ i ∈ E, u i = 0
 
-end DavenportProject
-
-end
-
-@[expose] public section
-
-namespace DavenportProject
-
-open Finset
-
-variable {G : Type*} [AddCommGroup G] {ι : Type*}
-
 open Classical in
 /-- The finite set `𝒵(u)` of zero sets of `u`. -/
 noncomputable def zeroSets [Fintype ι] (u : ι → G) : Finset (Finset ι) :=
@@ -61,18 +47,6 @@ def IsIncidenceIdentity (R : Type*) [CommRing R] [Fintype ι] (u : ι → G) (t 
     (c : Finset ι → R) : Prop :=
   ∑ E ∈ zeroSets u, c E = 1 ∧
     ∀ J : Finset ι, 1 ≤ #J → #J ≤ t → ∑ E ∈ zeroSets u with J ⊆ E, c E = 0
-
-end DavenportProject
-
-end
-
-@[expose] public section
-
-namespace DavenportProject
-
-open Finset
-
-variable {G : Type*} [AddCommGroup G] {ι : Type*}
 
 /-- `u` has an `𝓘_t`-identity over `R`; over `R = ℤ` this is an *integral* identity. -/
 def HasIncidenceIdentity (R : Type*) [CommRing R] [Fintype ι] (u : ι → G) (t : ℕ) : Prop :=
@@ -92,24 +66,12 @@ def HasSeparator (K : Type*) [Field K] (u : ι → G) (t : ℕ) : Prop :=
 def IsShortZeroFree (u : ι → G) : Prop :=
   ∀ E : Finset ι, IsZeroSet u E → AddMonoid.exponent G < #E
 
-end DavenportProject
-
-end
-
 /-!
 ## Reindexing incidence identities
 
 Basic transport lemmas used throughout: membership in `zeroSets`, and the invariance of
 `HasIncidenceIdentity` under a reindexing of the positions by an equivalence.
 -/
-
-public section
-
-namespace DavenportProject
-
-open Finset DavenportProject
-
-variable {G : Type*} [AddCommGroup G]
 
 theorem mem_zeroSets {ι : Type*} [Fintype ι] {u : ι → G} {E : Finset ι} :
     E ∈ zeroSets u ↔ IsZeroSet u E := by
@@ -160,28 +122,13 @@ theorem hasIncidenceIdentity_comp_equiv {R : Type*} [CommRing R] {ι ι' : Type*
     simp only [map_subset_map] at this
     convert this.trans (hJ (J.map σ.toEmbedding) (by simpa using h1) (by simpa using h2))
 
-end DavenportProject
-
-end
-
-/-!
-## Short-zero-freeness along embeddings
--/
-
-public section
-
-namespace DavenportProject
-
-open Finset DavenportProject
+/-! ## Short-zero-freeness along embeddings -/
 
 /-- Short-zero-freeness passes to a reindexed subsequence along an embedding `f : ι' ↪ ι`. -/
-theorem isShortZeroFree_comp_embedding {G : Type*} [AddCommGroup G] {ι ι' : Type*}
-    {u : ι → G} (hu : IsShortZeroFree u) (f : ι' ↪ ι) :
-    IsShortZeroFree (fun i => u (f i)) := by
+theorem isShortZeroFree_comp_embedding {ι ι' : Type*} {u : ι → G} (hu : IsShortZeroFree u)
+    (f : ι' ↪ ι) : IsShortZeroFree (fun i => u (f i)) := by
   intro E hE
   have hE' : IsZeroSet u (E.map f) := ⟨hE.1.map, by rw [sum_map]; exact hE.2⟩
   simpa using hu _ hE'
 
 end DavenportProject
-
-end

@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -23,20 +23,23 @@ import Mathlib.Tactic.IntervalCases
 sum to zero. The finite part is the kernel check of `Bases.CubeThree.SupportCheck`.
 -/
 
+public section
+
+namespace DavenportProject
+
+open Finset CubeThree.Support
+
 /-!
 ## Soundness of the enumeration for Lemma 5.1(2)
 
 `enumeration` turns the kernel computation `checkFrom_eq_true` into a statement about seven
 or eight strictly increasing codes taken from an admissible set `B` of codes. The codes are
-decoded into `(ZMod 3)^3` by `dec`, which turns `add3` into addition. `support_card` then gives
-the three conclusions of Lemma 5.1(2) for admissible sets of codes.
+decoded into `(ZMod 3)^3` by `dec`, which turns `add3` into addition. `card_le_eight`,
+`sum_dec_ne_zero` and `sum_dec_eq_zero` then give the three conclusions of Lemma 5.1(2) for
+admissible sets of codes.
 -/
 
-public section
-
-namespace DavenportProject.CubeThree.Support
-
-open Finset
+namespace CubeThree.Support
 
 theorem checkFrom_eq_true {a : ℕ} (h1 : 1 ≤ a) (h27 : a < 27) : checkFrom a = true := by
   interval_cases a
@@ -44,68 +47,6 @@ theorem checkFrom_eq_true {a : ℕ} (h1 : 1 ≤ a) (h27 : a < 27) : checkFrom a 
     checkFrom_8, checkFrom_9, checkFrom_10, checkFrom_11, checkFrom_12, checkFrom_13, checkFrom_14,
     checkFrom_15, checkFrom_16, checkFrom_17, checkFrom_18, checkFrom_19, checkFrom_20,
     checkFrom_21, checkFrom_22, checkFrom_23, checkFrom_24, checkFrom_25, checkFrom_26]
-
-section Admissible
-
-variable {B : Finset ℕ} (hB : ∀ n ∈ B, n < 27) (h0 : 0 ∉ B)
-  (h2 : ∀ x ∈ B, ∀ y ∈ B, x ≠ y → add3 x y ≠ 0)
-  (h3 : ∀ x ∈ B, ∀ y ∈ B, ∀ z ∈ B, x ≠ y → x ≠ z → y ≠ z → add3 (add3 x y) z ≠ 0)
-include h0 h2 h3
-
-include hB in
-/-- The finite statement, read off from the kernel computation `checkFrom_eq_true`. -/
-theorem enumeration {a b c d e f g : ℕ} (ha : a ∈ B) (hb : b ∈ B) (hc : c ∈ B) (hd : d ∈ B)
-    (he : e ∈ B) (hf : f ∈ B) (hg : g ∈ B) (hab : a < b) (hbc : b < c) (hcd : c < d)
-    (hde : d < e) (hef : e < f) (hfg : f < g) :
-    add3 (add3 (add3 (add3 (add3 (add3 a b) c) d) e) f) g ≠ 0 ∧
-      ∀ h ∈ B, g < h → add3 (add3 (add3 (add3 (add3 (add3 (add3 a b) c) d) e) f) g) h = 0 := by
-  have ha0 : 1 ≤ a := Nat.pos_of_ne_zero fun e => h0 (e ▸ ha)
-  have H := checkFrom_eq_true ha0 (hB a ha)
-  have H := of_allFrom H hab (hB b hb)
-  rw [testBit_mk_of_mem h0 h2 h3 (by simp [ha]) (by simp; omega) hb, Bool.false_or] at H
-  have H := of_allFrom H hbc (hB c hc)
-  rw [testBit_mk_of_mem h0 h2 h3 (by simp [ha, hb]) (by simp; omega) hc, Bool.false_or] at H
-  have H := of_allFrom H hcd (hB d hd)
-  rw [testBit_mk_of_mem h0 h2 h3 (by simp [ha, hb, hc]) (by simp; omega) hd, Bool.false_or] at H
-  have H := of_allFrom H hde (hB e he)
-  rw [testBit_mk_of_mem h0 h2 h3 (by simp [ha, hb, hc, hd]) (by simp; omega) he,
-    Bool.false_or] at H
-  have H := of_allFrom H hef (hB f hf)
-  rw [testBit_mk_of_mem h0 h2 h3 (by simp [ha, hb, hc, hd, he]) (by simp; omega) hf,
-    Bool.false_or] at H
-  have H := of_allFrom H hfg (hB g hg)
-  rw [testBit_mk_of_mem h0 h2 h3 (by simp [ha, hb, hc, hd, he, hf]) (by simp; omega) hg,
-    Bool.false_or, Bool.and_eq_true, bne_iff_ne] at H
-  refine ⟨H.1, fun h hh hgh => ?_⟩
-  have H := of_allFrom H.2 hgh (hB h hh)
-  rwa [testBit_mk_of_mem h0 h2 h3 (by simp [ha, hb, hc, hd, he, hf, hg]) (by simp; omega) hh,
-    Bool.false_or, beq_iff_eq] at H
-
-end Admissible
-
-end DavenportProject.CubeThree.Support
-
-end
-
-/-!
-## Proof of Lemma 5.1(2)
-
-## Proof
-
-The exponent of `(ZMod 3)^3` is `3`, so the support `A` of
-a short-zero-free sequence contains no zero, no two distinct points with sum zero and no three
-distinct points with sum zero (each would give a zero set of size at most three). Coding points
-by `code`, the set of codes satisfies the hypotheses of the kernel-checked `enumeration`
-(see `Bases/CubeThree/SupportCheck.lean`): seven admissible points never sum to
-zero and eight always do. Nine admissible points cannot exist: each eight-point subset sums to
-zero, so all nine points would equal the total sum.
--/
-
-public section
-
-namespace DavenportProject.CubeThree.Support
-
-open Finset
 
 /-- Base-3 code of a point of `(ZMod 3)^3`. -/
 def code (x : Fin 3 → ZMod 3) : ℕ := (x 0).val + 3 * (x 1).val + 9 * (x 2).val
@@ -173,6 +114,34 @@ variable {B : Finset ℕ} (hB : ∀ n ∈ B, n < 27) (h0 : 0 ∉ B)
   (h3 : ∀ x ∈ B, ∀ y ∈ B, ∀ z ∈ B, x ≠ y → x ≠ z → y ≠ z → add3 (add3 x y) z ≠ 0)
 include hB h0 h2 h3
 
+/-- The finite statement, read off from the kernel computation `checkFrom_eq_true`. -/
+theorem enumeration {a b c d e f g : ℕ} (ha : a ∈ B) (hb : b ∈ B) (hc : c ∈ B) (hd : d ∈ B)
+    (he : e ∈ B) (hf : f ∈ B) (hg : g ∈ B) (hab : a < b) (hbc : b < c) (hcd : c < d)
+    (hde : d < e) (hef : e < f) (hfg : f < g) :
+    add3 (add3 (add3 (add3 (add3 (add3 a b) c) d) e) f) g ≠ 0 ∧
+      ∀ h ∈ B, g < h → add3 (add3 (add3 (add3 (add3 (add3 (add3 a b) c) d) e) f) g) h = 0 := by
+  have ha0 : 1 ≤ a := Nat.pos_of_ne_zero fun e => h0 (e ▸ ha)
+  have H := checkFrom_eq_true ha0 (hB a ha)
+  have H := of_allFrom H hab (hB b hb)
+  rw [testBit_mk_of_mem h0 h2 h3 (by simp [ha]) (by simp; omega) hb, Bool.false_or] at H
+  have H := of_allFrom H hbc (hB c hc)
+  rw [testBit_mk_of_mem h0 h2 h3 (by simp [ha, hb]) (by simp; omega) hc, Bool.false_or] at H
+  have H := of_allFrom H hcd (hB d hd)
+  rw [testBit_mk_of_mem h0 h2 h3 (by simp [ha, hb, hc]) (by simp; omega) hd, Bool.false_or] at H
+  have H := of_allFrom H hde (hB e he)
+  rw [testBit_mk_of_mem h0 h2 h3 (by simp [ha, hb, hc, hd]) (by simp; omega) he,
+    Bool.false_or] at H
+  have H := of_allFrom H hef (hB f hf)
+  rw [testBit_mk_of_mem h0 h2 h3 (by simp [ha, hb, hc, hd, he]) (by simp; omega) hf,
+    Bool.false_or] at H
+  have H := of_allFrom H hfg (hB g hg)
+  rw [testBit_mk_of_mem h0 h2 h3 (by simp [ha, hb, hc, hd, he, hf]) (by simp; omega) hg,
+    Bool.false_or, Bool.and_eq_true, bne_iff_ne] at H
+  refine ⟨H.1, fun h hh hgh => ?_⟩
+  have H := of_allFrom H.2 hgh (hB h hh)
+  rwa [testBit_mk_of_mem h0 h2 h3 (by simp [ha, hb, hc, hd, he, hf, hg]) (by simp; omega) hh,
+    Bool.false_or, beq_iff_eq] at H
+
 theorem sum_dec_ne_zero (hcard : #B = 7) : ∑ n ∈ B, dec n ≠ 0 := by
   set f := B.orderEmbOfFin hcard
   have hm := B.orderEmbOfFin_mem hcard
@@ -226,16 +195,19 @@ theorem three_le_exponent : 3 ≤ AddMonoid.exponent (Fin 3 → ZMod 3) := by
     ZMod.natCast_eq_zero_iff] at h
   exact Nat.le_of_dvd (Nat.pos_of_ne_zero hne) h
 
-end DavenportProject.CubeThree.Support
+end CubeThree.Support
 
-end
+/-!
+## Proof of Lemma 5.1(2)
 
-public section
-
-namespace DavenportProject
-
-open Finset
-open DavenportProject.CubeThree.Support
+The exponent of `(ZMod 3)^3` is `3`, so the support `A` of
+a short-zero-free sequence contains no zero, no two distinct points with sum zero and no three
+distinct points with sum zero (each would give a zero set of size at most three). Coding points
+by `code`, the set of codes satisfies the hypotheses of the kernel-checked `enumeration`
+(see `Bases/CubeThree/SupportCheck.lean`): seven admissible points never sum to
+zero and eight always do. Nine admissible points cannot exist: each eight-point subset sums to
+zero, so all nine points would equal the total sum.
+-/
 
 /-- **Lemma 5.1(2)** (finite computation): the support of a
 short-zero-free sequence over `C_3^3` has at most eight points; every such support with seven
@@ -290,5 +262,3 @@ theorem card_support_le_of_isShortZeroFree_cube_three {N : ℕ} (u : Fin N → (
   · rw [hsum]; exact sum_dec_eq_zero hB h0 h2 h3 (hcard.trans h8)
 
 end DavenportProject
-
-end

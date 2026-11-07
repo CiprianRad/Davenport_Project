@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -10,24 +10,17 @@ public import DavenportProject.Bases.CubeFour.Codes
 /-!
 # Completeness of the enumeration for Lemma 5.3
 
-`leaf_of_prefixes`: every sorted, short-zero-free code list satisfying the normalization guards
-is reached by the enumeration `DavenportCompute.gdfs`, so a property checked at all of its leaves
-holds for the list.
--/
-
-/-!
-## Completeness of the enumeration `gdfs`
-
 Every sorted short-zero-free list of codes `F` satisfying the normalization guards is reached by
-the enumeration `DavenportCompute.gdfs`: if the enumeration accepts, then `leaf F.reverse`.
+the enumeration `DavenportCompute.gdfs`, so a property `leaf` checked at all of its leaves holds
+for `F.reverse`.
 
 * `gdfs_complete`: if `gdfs` accepts from the prefix `acc`, then `leaf (L.reverse ++ acc)` for
   every sorted list `L` of the right length whose entries are never skipped along the way.
 * `skip_take_eq_false`: in a sorted list `F` with `ListSZF F` and `Guards F`, the entry `F[k]` is
   not skipped after the prefix `F.take k`. A skip by a sum would give a sublist of `F` of length
   at most four with code sum zero; a skip by a guard contradicts `Guards F` and the order of `F`.
-* `leaf_of_gdfs` (the enumeration from the empty prefix) and `leaf_of_prefixes` (the
-  enumeration split at depth `d`: first up to the prefixes of depth `d`, then from each prefix).
+* `leaf_of_prefixes`: if the enumeration split at depth `d` (first up to the prefixes of depth
+  `d`, then from each prefix) accepts, then `leaf F.reverse`.
 -/
 
 public section
@@ -142,15 +135,6 @@ theorem gdfs_complete (leaf : List ℕ → Bool) :
         simpa using h₂) h₁
     simpa using this
 
-/-- Completeness of the enumeration from the empty prefix: if `gdfs` accepts, then `leaf` holds
-on (the reverse of) every sorted short-zero-free list of nonzero codes satisfying the guards. -/
-theorem leaf_of_gdfs (leaf : List ℕ → Bool) (F : List ℕ) (hsort : F.Pairwise (· ≤ ·))
-    (hlt : ∀ y ∈ F, 1 ≤ y ∧ y < 64) (hszf : ListSZF F) (hg : Guards F)
-    (h : gdfs leaf F.length 1 [] 0 0 0 = true) : leaf F.reverse = true := by
-  have := gdfs_complete leaf F 1 [] hsort hlt
-    (fun k hk => by simpa using skip_take_eq_false hsort hlt hszf hg hk) h
-  simpa using this
-
 /-- Completeness of the enumeration split at depth `d`: the prefixes of depth `d` reached by
 `gdfs` are listed by `prefixes d`, and the enumeration continues from each of them. -/
 theorem leaf_of_prefixes (leaf : List ℕ → Bool) (d : ℕ) (F : List ℕ) (hd : d ≤ F.length)
@@ -193,5 +177,3 @@ theorem leaf_of_prefixes (leaf : List ℕ → Bool) (d : ℕ) (F : List ℕ) (hd
   rwa [← List.reverse_append, List.take_append_drop] at h₃
 
 end DavenportProject.CubeFour
-
-end

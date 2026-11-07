@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -16,25 +16,21 @@ import Mathlib.Algebra.Field.ZMod
 # Olson's theorem
 
 `davenport_pi_zmod_prime_pow`: for a prime `p`, `D(⊕ᵢ C_{p^{aᵢ}}) = 1 + ∑ᵢ (p^{aᵢ} - 1)`
-(Olson 1969). The upper bound comes from the nilpotency of the augmentation ideal; the lower bound
-from the sequence with `p^{aᵢ} - 1` copies of each basis vector.
--/
-
-/-!
-## Proof of Olson's theorem
-
-Write `H = ∏ᵢ ZMod (p ^ aᵢ)` and `M = ∑ᵢ (p ^ aᵢ - 1)`.
-* Upper bound: for `u : Fin (M + 1) → H`, the product `∏ⱼ (X^{uⱼ} - 1)` vanishes in `𝔽_p[H]`.
-  Expanding it over subsets, its coefficient at `0` is `±1` if `∅` is the only zero-sum subset.
+(Olson 1969). Write `H = ∏ᵢ ZMod (p ^ aᵢ)` and `M = ∑ᵢ (p ^ aᵢ - 1)`.
+* Upper bound, from the nilpotency of the augmentation ideal: for `u : Fin (M + 1) → H`, the
+  product `∏ⱼ (X^{uⱼ} - 1)` vanishes in `𝔽_p[H]`. Expanding it over subsets, its coefficient at
+  `0` is `±1` if `∅` is the only zero-sum subset.
 * Lower bound: `p ^ aᵢ - 1` copies of each basis vector `eᵢ` form a zero-sum free sequence of
   length `M`; its initial segments are zero-sum free as well.
 -/
 
 public section
 
-namespace DavenportProject.Transfer
+namespace DavenportProject
 
-open Finset
+open Finset Transfer
+
+namespace Transfer
 
 variable {p : ℕ} [Fact p.Prime] {r : ℕ} {a : Fin r → ℕ}
 
@@ -126,16 +122,7 @@ theorem exists_not_isZeroSet {L' : ℕ} (hL : L' < ∑ i, (p ^ a i - 1) + 1) :
   obtain ⟨hne, hsum⟩ := hE
   exact ⟨hne.map, by rw [sum_map]; exact hsum⟩
 
-end DavenportProject.Transfer
-
-end
-
-public section
-
-namespace DavenportProject
-
-open Finset
-open DavenportProject.Transfer
+end Transfer
 
 /-- Olson's theorem (Olson 1969):
 `D(⊕_i C_{p^{a_i}}) = 1 + ∑_i (p^{a_i} - 1)`. -/
@@ -145,5 +132,3 @@ theorem davenport_pi_zmod_prime_pow (p : ℕ) [Fact p.Prime] {r : ℕ} (a : Fin 
   exact ⟨exists_isZeroSet, fun _ hL => exists_not_isZeroSet hL⟩
 
 end DavenportProject
-
-end

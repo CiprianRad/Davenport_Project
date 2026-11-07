@@ -1,20 +1,15 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
-public import DavenportProject.Defs
 public import DavenportProject.Invariants
-public import Mathlib.Data.Fin.VecNotation
-public import Mathlib.Data.ZMod.Basic
 public import Mathlib.GroupTheory.PGroup
-import DavenportProject.Bases.CubeFour.Quaternary
 import DavenportProject.TheoremB
 import DavenportProject.Transfer.Olson
 import DavenportProject.Transfer.TheoremA
-import Mathlib.Algebra.BigOperators.Fin
 
 /-!
 # Corollary C
@@ -30,17 +25,20 @@ The upper bound is Theorem A for integral identities applied to Theorem B (eq. (
 bound is the basis bound `D(G) ≥ D*(G)`.
 -/
 
+public section
+
+namespace DavenportProject
+
+open Finset Transfer
+
+namespace CorollaryC
+
 /-!
 ## The Chinese remainder splitting in Corollary C
 
-For a prime
-`p ∤ m`, the Chinese remainder theorem identifies `C_m^3 ⊕ (C_{p^a} ⊕ C_{p^b} ⊕ C_{p^c})` with
-`C_{mp^a} ⊕ C_{mp^b} ⊕ C_{mp^c}`.
+For a prime `p ∤ m`, the Chinese remainder theorem identifies
+`C_m^3 ⊕ (C_{p^a} ⊕ C_{p^b} ⊕ C_{p^c})` with `C_{mp^a} ⊕ C_{mp^b} ⊕ C_{mp^c}`.
 -/
-
-public section
-
-namespace DavenportProject.CorollaryC
 
 /-- For a prime `p ∤ m`, `m` is coprime to every power of `p`. -/
 theorem coprime_pow_of_not_dvd {m p : ℕ} [hp : Fact p.Prime] (hpm : ¬ p ∣ m) (x : ℕ) :
@@ -74,19 +72,11 @@ noncomputable def zmodProdThreeAddEquiv (m : ℕ) (p : ℕ) [Fact p.Prime] (hpm 
   map_add' y z := by
     simp only [Prod.fst_add, Prod.snd_add, Pi.add_apply, ← map_add, Prod.mk_add_mk]
 
-end DavenportProject.CorollaryC
-
-end
-
 /-!
 ## The `p`-part of the group in Corollary C is a `p`-group
 
 `H = C_{p^a} ⊕ C_{p^b} ⊕ C_{p^c}` is a finite abelian `p`-group.
 -/
-
-public section
-
-namespace DavenportProject.CorollaryC
 
 /-- `C_{p^a} ⊕ C_{p^b} ⊕ C_{p^c}` is a `p`-group. -/
 theorem isPGroup_zmod_prod_three (p : ℕ) [Fact p.Prime] (a b c : ℕ) :
@@ -94,10 +84,6 @@ theorem isPGroup_zmod_prod_three (p : ℕ) [Fact p.Prime] (a b c : ℕ) :
   refine IsPGroup.of_card (n := a + b + c) ?_
   rw [Nat.card_congr Multiplicative.toAdd, Nat.card_prod, Nat.card_prod, Nat.card_zmod,
     Nat.card_zmod, Nat.card_zmod, pow_add, pow_add, mul_assoc]
-
-end DavenportProject.CorollaryC
-
-end
 
 /-!
 ## The lower bound `D(G) ≥ D*(G)`
@@ -107,12 +93,6 @@ free of length `∑ᵢ (nᵢ - 1)`. If `D(G) ≤ ∑ᵢ (nᵢ - 1)`, its initial
 would have a zero set by `davenport_eq_iff`, a contradiction. The divisibility hypotheses are
 not needed for this direction (adapted from the lower bound in the proof of Olson's theorem).
 -/
-
-public section
-
-namespace DavenportProject.CorollaryC
-
-open Finset
 
 /-- The index type of the basis sequence: `nᵢ - 1` slots for each coordinate `i`. -/
 abbrev BasisIdx {r : ℕ} (n : Fin r → ℕ) : Type := (i : Fin r) × Fin (n i - 1)
@@ -164,13 +144,10 @@ theorem not_isZeroSet_basisSeq {r : ℕ} (n : Fin r → ℕ) (E : Finset (BasisI
   have := Nat.le_of_dvd hpos hi
   omega
 
-/-- for `G ≃ C_{n_1} ⊕ ⋯ ⊕ C_{n_r}` with `1 < n_1 ∣ ⋯ ∣ n_r`,
-`D(G) ≥ D*(G) = 1 + ∑_i (n_i - 1)`. -/
-theorem one_add_sum_le_davenport {r : ℕ} (n : Fin r → ℕ) [∀ i, NeZero (n i)]
-    (hn : ∀ i, 1 < n i) (hdvd : ∀ i j, i ≤ j → n i ∣ n j) :
+/-- `D(C_{n_1} ⊕ ⋯ ⊕ C_{n_r}) ≥ 1 + ∑_i (n_i - 1)`, which is `D*(G)` when
+`1 < n_1 ∣ ⋯ ∣ n_r`; the bound needs neither condition. -/
+theorem one_add_sum_le_davenport {r : ℕ} (n : Fin r → ℕ) [∀ i, NeZero (n i)] :
     1 + ∑ i, (n i - 1) ≤ davenport ((i : Fin r) → ZMod (n i)) := by
-  -- The lower bound needs neither `1 < nᵢ` nor the divisibility chain.
-  have _ : _ ∧ _ := ⟨hn, hdvd⟩
   classical
   by_contra hlt
   push Not at hlt
@@ -182,10 +159,6 @@ theorem one_add_sum_le_davenport {r : ℕ} (n : Fin r → ℕ) [∀ i, NeZero (n
   obtain ⟨E, hne, hsum⟩ := hforce (basisSeq n ∘ e)
   exact not_isZeroSet_basisSeq n (E.map e) ⟨hne.map, by rw [sum_map]; exact hsum⟩
 
-end DavenportProject.CorollaryC
-
-end
-
 /-!
 ## The lower bound in Corollary C
 
@@ -195,12 +168,6 @@ The basis lower bound: for `m ∈ {2, 3, 4}`, a prime `p` and `a ≤ b ≤ c`,
 This is the bound `one_add_sum_le_davenport` for `n = ![mp^a, mp^b, mp^c]`, transported from the
 Pi carrier to the product carrier along `davenport_congr`.
 -/
-
-public section
-
-namespace DavenportProject.CorollaryC
-
-open DavenportProject.Transfer
 
 /-- The Pi carrier `∀ i : Fin 3, ZMod (![x, y, z] i)` is the product `ZMod x × ZMod y × ZMod z`. -/
 def piFinThreeZModAddEquiv (x y z : ℕ) :
@@ -215,11 +182,11 @@ def piFinThreeZModAddEquiv (x y z : ℕ) :
   right_inv _ := rfl
   map_add' _ _ := rfl
 
-/-- For `m ∈ {2, 3, 4}`, a prime `p` and `a ≤ b ≤ c`,
-`m(p^a + p^b + p^c) - 2 ≤ D(C_{mp^a} ⊕ C_{mp^b} ⊕ C_{mp^c})`. The hypothesis `p ∤ m` of
-Corollary C is not needed for this direction. -/
+/-- For `m ∈ {2, 3, 4}` and a prime `p`,
+`m(p^a + p^b + p^c) - 2 ≤ D(C_{mp^a} ⊕ C_{mp^b} ⊕ C_{mp^c})`. Neither the hypothesis `p ∤ m` of
+Corollary C nor `a ≤ b ≤ c` is needed for this direction. -/
 theorem le_davenport_zmod_prod_three (m : ℕ) [NeZero m] (hm : m = 2 ∨ m = 3 ∨ m = 4) (p : ℕ)
-    [Fact p.Prime] (a b c : ℕ) (hab : a ≤ b) (hbc : b ≤ c) :
+    [Fact p.Prime] (a b c : ℕ) :
     m * (p ^ a + p ^ b + p ^ c) - 2 ≤
       davenport (ZMod (m * p ^ a) × ZMod (m * p ^ b) × ZMod (m * p ^ c)) := by
   have hm2 : 2 ≤ m := by omega
@@ -234,17 +201,7 @@ theorem le_davenport_zmod_prod_three (m : ℕ) [NeZero m] (hm : m = 2 ∨ m = 3 
     · exact hpow b
     · exact hpow c
   have : ∀ i, NeZero (n i) := fun i => ⟨by have := hn i; omega⟩
-  have hdvd : ∀ i j, i ≤ j → n i ∣ n j := by
-    have hd : ∀ x y, x ≤ y → m * p ^ x ∣ m * p ^ y := fun x y h =>
-      mul_dvd_mul_left m (pow_dvd_pow p h)
-    intro i j hij
-    fin_cases i <;> fin_cases j <;> simp at hij <;>
-      first
-      | exact dvd_rfl
-      | exact hd _ _ hab
-      | exact hd _ _ hbc
-      | exact hd _ _ (hab.trans hbc)
-  have hD := one_add_sum_le_davenport n hn hdvd
+  have hD := one_add_sum_le_davenport n
   rw [davenport_congr (piFinThreeZModAddEquiv _ _ _)] at hD
   have hsum : ∑ i, (n i - 1) = (m * p ^ a - 1) + (m * p ^ b - 1) + (m * p ^ c - 1) := by
     rw [Fin.sum_univ_three]
@@ -254,10 +211,6 @@ theorem le_davenport_zmod_prod_three (m : ℕ) [NeZero m] (hm : m = 2 ∨ m = 3 
   have hc := hpow c
   rw [mul_add, mul_add]
   omega
-
-end DavenportProject.CorollaryC
-
-end
 
 /-!
 ## Eq. (6.1) and Corollary C
@@ -275,12 +228,6 @@ Corollary C (`davenport_zmod_prod_three`):
 
 The cases `a = b = c` with `m = 3` and `m = 4` and the displayed values follow.
 -/
-
-public section
-
-namespace DavenportProject.CorollaryC
-
-open DavenportProject.Transfer
 
 /-- Eq. (6.1): for `m ∈ {2,3,4}`, every prime `p` and every finite abelian `p`-group `H`,
 `D(C_m^3 ⊕ H) ≤ m(D(H) - 1) + 3m - 2`. -/
@@ -327,18 +274,18 @@ def finThreeZModAddEquiv (n : ℕ) : (Fin 3 → ZMod n) ≃+ ZMod n × ZMod n ×
   right_inv _ := rfl
   map_add' _ _ := rfl
 
-end DavenportProject.CorollaryC
+end CorollaryC
 
-namespace DavenportProject
-
+-- The proof does not use the paper's normalization `a ≤ b ≤ c`, which the statement keeps.
+set_option linter.unusedVariables false in
+open CorollaryC in
 /-- **Corollary C**, eq. (1.4): for `m ∈ {2,3,4}`, a prime `p ∤ m` and
 `0 ≤ a ≤ b ≤ c`, `D(C_{mp^a} ⊕ C_{mp^b} ⊕ C_{mp^c}) = m(p^a + p^b + p^c) - 2`. -/
 theorem davenport_zmod_prod_three (m : ℕ) [NeZero m] (hm : m = 2 ∨ m = 3 ∨ m = 4) (p : ℕ)
     [Fact p.Prime] (hpm : ¬ p ∣ m) (a b c : ℕ) (hab : a ≤ b) (hbc : b ≤ c) :
     davenport (ZMod (m * p ^ a) × ZMod (m * p ^ b) × ZMod (m * p ^ c)) =
-      m * (p ^ a + p ^ b + p ^ c) - 2 :=
-  open CorollaryC Transfer in by
-  refine le_antisymm ?_ (le_davenport_zmod_prod_three m hm p a b c hab hbc)
+      m * (p ^ a + p ^ b + p ^ c) - 2 := by
+  refine le_antisymm ?_ (le_davenport_zmod_prod_three m hm p a b c)
   rw [← davenport_congr (zmodProdThreeAddEquiv m p hpm a b c)]
   refine (davenport_cube_prod_le m hm p _ (isPGroup_zmod_prod_three p a b c)).trans_eq ?_
   rw [davenport_zmod_pow_prod_three]
@@ -351,25 +298,15 @@ theorem davenport_zmod_prod_three (m : ℕ) [NeZero m] (hm : m = 2 ∨ m = 3 ∨
   congr 1
   ring
 
-end DavenportProject
-
-namespace DavenportProject.CorollaryC
-
-open DavenportProject.Transfer
-
 /-- Corollary C with `a = b = c`: for `m ∈ {2,3,4}` and a prime `p ∤ m`,
 `D(C_{mp^a}^3) = 3m p^a - 2`. -/
-theorem davenport_cube_mul_prime_pow (m : ℕ) [NeZero m] (hm : m = 2 ∨ m = 3 ∨ m = 4) (p : ℕ)
-    [Fact p.Prime] (hpm : ¬ p ∣ m) (a : ℕ) :
+theorem CorollaryC.davenport_cube_mul_prime_pow (m : ℕ) [NeZero m]
+    (hm : m = 2 ∨ m = 3 ∨ m = 4) (p : ℕ) [Fact p.Prime] (hpm : ¬ p ∣ m) (a : ℕ) :
     davenport (Fin 3 → ZMod (m * p ^ a)) = 3 * m * p ^ a - 2 := by
   rw [davenport_congr (finThreeZModAddEquiv _),
     davenport_zmod_prod_three m hm p hpm a a a le_rfl le_rfl]
   congr 1
   ring
-
-end DavenportProject.CorollaryC
-
-namespace DavenportProject
 
 /-- **Corollary C** for `m = 3`: `D(C_{3p^a}^3) = 9p^a - 2` for a prime `p ≠ 3`. -/
 theorem davenport_cube_three_mul_prime_pow (p : ℕ) [Fact p.Prime] (hp : p ≠ 3) (a : ℕ) :
@@ -426,5 +363,3 @@ theorem davenport_zmod_four_twenty_hundred :
   davenport_zmod_prod_three 4 (by decide) 5 (by norm_num) 0 1 2 (by norm_num) (by norm_num)
 
 end DavenportProject
-
-end

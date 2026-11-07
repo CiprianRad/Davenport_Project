@@ -1,26 +1,14 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
-public import DavenportProject.Defs
 public import DavenportProject.Invariants
-public import Mathlib.Algebra.MvPolynomial.Degrees
-public import Mathlib.Algebra.MvPolynomial.Eval
 public import Mathlib.Algebra.MvPolynomial.Monad
-public import Mathlib.Data.ZMod.Basic
 public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
-import Mathlib.Algebra.BigOperators.Intervals
-import Mathlib.Algebra.BigOperators.Ring.Finset
-import Mathlib.Algebra.CharP.Defs
-import Mathlib.Data.Finset.Powerset
-import Mathlib.Data.Nat.Factorial.SuperFactorial
-import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.LinearAlgebra.Vandermonde
-import Mathlib.Order.Interval.Finset.Nat
-import Mathlib.RingTheory.Polynomial.Pochhammer
 
 /-!
 # Proposition 4.1: sharpness
@@ -30,6 +18,13 @@ divide `m`, `m(t + 3) - 2 ≤ κ_t(C_m^3; K)`. The sequence `e₁^{m-1} e₂^{m-
 length `m(t + 3) - 3` has a separator of degree `t`, built from elementary symmetric polynomials;
 its existence uses the binomial determinant `det (binom(mk, j)) = m^{t(t+1)/2}`.
 -/
+public section
+
+namespace DavenportProject
+
+open Finset MvPolynomial Matrix
+
+namespace Sharpness
 
 /-!
 ## The binomial determinant `det (binom(mk, j)) = m^{t(t+1)/2}`
@@ -40,12 +35,7 @@ Proof: scaling column `j` by `j!` turns
 `m^{t(t+1)/2}` times the superfactorial `sf t = ∏_{j ≤ t} j!`.
 -/
 
-public section
-
-namespace DavenportProject.Sharpness
-
-open Matrix Polynomial Nat
-
+open Nat in
 /-- `∏_{j ≤ t} j! = sf t`. -/
 private theorem prod_factorial_fin_eq_superFactorial (t : ℕ) :
     ∏ j : Fin (t + 1), ((j : ℕ)! : ℤ) = (t.superFactorial : ℤ) := by
@@ -58,6 +48,7 @@ private theorem prod_factorial_fin_eq_superFactorial (t : ℕ) :
     push_cast
     ring
 
+open Nat in
 /-- `det (binom(mk, j))_{0 ≤ k, j ≤ t} = m^{t(t+1)/2}` over `ℤ`. -/
 theorem det_choose_mul (m t : ℕ) :
     (Matrix.of fun k j : Fin (t + 1) => ((Nat.choose (m * (k : ℕ)) (j : ℕ) : ℕ) : ℤ)).det =
@@ -94,10 +85,6 @@ theorem det_choose_mul (m t : ℕ) :
     Finset.prod_ne_zero_iff.mpr fun j _ => by exact_mod_cast Nat.factorial_ne_zero _
   exact mul_right_cancel₀ hsf (by rw [← hV]; ring)
 
-end DavenportProject.Sharpness
-
-end
-
 /-!
 ## Elementary symmetric polynomials in a block of variables
 
@@ -106,11 +93,7 @@ elementary symmetric polynomial of degree `j` in the variables of `T`.
 On the incidence vector of a subset `E ⊆ T` it takes the value `binom(|E|, j)`.
 -/
 
-public section
-
-namespace DavenportProject.Sharpness
-
-open Finset MvPolynomial
+section EsymmOn
 
 variable {ι : Type*} (K : Type*) [Field K]
 
@@ -141,9 +124,7 @@ theorem eval_esymmOn {T E : Finset ι} (hE : E ⊆ T) (j : ℕ) :
     exact ⟨fun h => ⟨h.2, h.1.2⟩, fun h => ⟨⟨h.1.trans hE, h.2⟩, h.1⟩⟩
   rw [hfilt, card_powersetCard]
 
-end DavenportProject.Sharpness
-
-end
+end EsymmOn
 
 /-!
 ## The extremal sequence `e₁^{m-1} e₂^{m-1} e₃^{m(t+1)-1}` and its zero sets
@@ -153,12 +134,6 @@ Positions `i < m - 1` carry `e₁`, positions `m - 1 ≤ i < 2(m - 1)` carry
 only, and its size is a multiple `mk` of `m` with `k` below the number of third-axis positions
 divided by `m`.
 -/
-
-public section
-
-namespace DavenportProject.Sharpness
-
-open Finset
 
 /-- The axis carried by position `i`. -/
 def axisOf (m i : ℕ) : Fin 3 :=
@@ -258,10 +233,6 @@ theorem isZeroSet_cubeSeq {m t n : ℕ} (hm : 1 ≤ m) (hn : n = 2 * (m - 1) + (
     exact absurd hcard hne.ne_empty
   · exact hk0
 
-end DavenportProject.Sharpness
-
-end
-
 /-!
 ## Separators pass to shorter sequences
 
@@ -269,12 +240,6 @@ A separator of degree `t` for a
 sequence of `N` terms restricts, by setting the last `N - N'` variables to zero, to a separator
 of degree `t` for the first `N'` terms.
 -/
-
-public section
-
-namespace DavenportProject.Sharpness
-
-open Finset MvPolynomial
 
 variable {G : Type*} [AddCommGroup G]
 
@@ -344,10 +309,6 @@ theorem exists_hasSeparator_of_le (K : Type*) [Field K] {t N N' : ℕ} (hN : N' 
     rw [Finset.sum_map]
     exact hE.2
 
-end DavenportProject.Sharpness
-
-end
-
 /-!
 ## The explicit separator of Proposition 4.1
 
@@ -357,12 +318,6 @@ The binomial matrix `B = (binom(mk, j))_{0 ≤ k, j ≤ t}` has determinant
 chosen with `P(𝟙_E) = [k = 0]` for every set `E` of `mk` third-axis positions, `0 ≤ k ≤ t`.
 It has degree at most `t`, equals one at the empty set and vanishes on all zero sets.
 -/
-
-public section
-
-namespace DavenportProject.Sharpness
-
-open Finset MvPolynomial Matrix
 
 /-- `m ≠ 0` in a field of characteristic zero or of characteristic not dividing `m`. -/
 theorem natCast_ne_zero_of_ringChar (m : ℕ) [NeZero m] (K : Type*) [Field K]
@@ -421,9 +376,7 @@ theorem hasSeparator_cubeSeq (m : ℕ) (hm : 1 ≤ m) (t : ℕ) (K : Type*) [Fie
     simp only [Fin.val_zero] at this
     omega
 
-end DavenportProject.Sharpness
-
-end
+end Sharpness
 
 /-!
 ## Proof of Proposition 4.1
@@ -435,12 +388,7 @@ determinant `det_choose_mul`). Since separators pass to shorter sequences
 `κ_t(C_m^3; K) > m(t+3) - 3`.
 -/
 
-public section
-
-namespace DavenportProject
-
-open DavenportProject.Sharpness
-
+open Sharpness in
 /-- **Proposition 4.1**: for `m ≥ 2`, `t ≥ 0` and a field `K` of
 characteristic zero or of characteristic not dividing `m`, `κ_t(C_m^3;K) ≥ m(t+3) - 2`. -/
 theorem le_kappa_cube (m : ℕ) [NeZero m] (hm : 2 ≤ m) (t : ℕ) (K : Type*) [Field K]
@@ -457,5 +405,3 @@ theorem le_kappa_cube (m : ℕ) [NeZero m] (hm : 2 ≤ m) (t : ℕ) (K : Type*) 
   exact hk u hu
 
 end DavenportProject
-
-end

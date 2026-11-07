@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -27,6 +27,13 @@ For a finite abelian `p`-group `H = ⊕ᵢ C_{p^{aᵢ}}` the augmentation ideal 
 indicator polynomial of Lemma 3.1 (`exists_multilinear_indicator`), stated in
 `DavenportProject.Transfer.Indicator`.
 -/
+public section
+
+namespace DavenportProject.Transfer
+
+open Finset MvPolynomial
+
+variable {p : ℕ} [Fact p.Prime] {ι : Type*} [Fintype ι] [DecidableEq ι] {a : ι → ℕ}
 
 /-!
 ## Nilpotency of the augmentation ideal of `𝔽_p[H]` for a finite abelian `p`-group `H`
@@ -36,14 +43,6 @@ Let `H = ∏ᵢ ZMod (p ^ aᵢ)` and `M = ∑ᵢ (p ^ aᵢ - 1)`. In the group a
 every `X^h - 1` lies in the ideal `I = (Y₁, …, Y_r)`, and `I ^ n = 0` for `n > M`. In
 particular any product of more than `M` elements of the form `X^h - 1` vanishes.
 -/
-
-public section
-
-namespace DavenportProject.Transfer
-
-open Finset
-
-variable {p : ℕ} [Fact p.Prime] {ι : Type*} [Fintype ι] [DecidableEq ι] {a : ι → ℕ}
 
 /-- The generator `Yᵢ = X^{eᵢ} - 1` of the augmentation ideal, where `eᵢ = Pi.single i 1`. -/
 noncomputable def augY (p : ℕ) (a : ι → ℕ) (i : ι) :
@@ -144,10 +143,6 @@ theorem prod_single_sub_one_eq_zero {κ : Type*} (s : Finset κ)
     Ideal.prod_mem_prod fun j _ => single_sub_one_mem_augIdeal (g j)
   rwa [prod_const, augIdeal_pow_eq_bot hs, Ideal.mem_bot] at hmem
 
-end DavenportProject.Transfer
-
-end
-
 /-!
 ## Proof of Lemma 3.1
 
@@ -156,12 +151,6 @@ The polynomial is `P = ∑_J β_J ∏_{j ∈ J} X_j`, where `β_J` is the identi
 `∏_{j ∈ E} X^{v_j} = X^{∑_{j ∈ E} v_j}`, and `β_J = 0` for `#J > M` by nilpotency of the
 augmentation ideal.
 -/
-
-public section
-
-namespace DavenportProject.Transfer
-
-open Finset MvPolynomial
 
 /-- The multilinear indicator polynomial of Lemma 3.1 (stated in the module
 `DavenportProject.Transfer.Indicator`). -/
@@ -228,5 +217,3 @@ theorem exists_multilinear_indicator {p : ℕ} [Fact p.Prime] {r : ℕ} {a : Fin
     rw [hcoeff, hprod, AddMonoidAlgebra.coeff_single, Finsupp.single_apply]
 
 end DavenportProject.Transfer
-
-end

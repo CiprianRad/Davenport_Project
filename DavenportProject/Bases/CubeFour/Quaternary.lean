@@ -1,14 +1,12 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
 public import DavenportProject.Defs
-public import Mathlib.Data.ZMod.Basic
 import DavenportProject.Bases.CubeFour.Checks
-import DavenportProject.Bases.CubeFour.Codes
 import DavenportProject.Bases.CubeFour.Enumeration
 import DavenportProject.Bases.CubeFour.Eta
 import DavenportProject.Bases.CubeFour.Normalize
@@ -28,6 +26,12 @@ pass the certificate checks of `Bases.CubeFour.Checks`. The normalization differ
 projection-and-lift; the orbit counts of the hard cases agree with the paper (6,963 and 64).
 -/
 
+public section
+
+namespace DavenportProject
+
+open Finset CubeFour DavenportCompute
+
 /-!
 ## Proof of Lemma 5.3(1)
 
@@ -45,15 +49,9 @@ Proof (with a different normalization than the paper's; finite part by
   sets and 36,461 get a stored certificate of one of 6,963 orbits, moved by a linear map.
 -/
 
-public section
-
-namespace DavenportProject.CubeFour
-
-open Finset DavenportProject DavenportCompute DavenportProject.CubeFour
-
 /-- A zero set of size at most four gives an integral `𝓘_1`-identity: the ten terms outside it
 contain a zero set (`D(C_4^3) = 10`), and Lemma 2.2(2) applies. -/
-theorem hasIncidenceIdentity_one_of_card_le_four {u : Fin 14 → (Fin 3 → ZMod 4)}
+theorem CubeFour.hasIncidenceIdentity_one_of_card_le_four {u : Fin 14 → (Fin 3 → ZMod 4)}
     {E : Finset (Fin 14)} (hE : IsZeroSet u E) (hcard : #E ≤ 4) : HasIncidenceIdentity ℤ u 1 := by
   obtain ⟨S, hS, hS10⟩ := exists_subset_card_eq (s := Eᶜ) (n := 10)
     (by rw [card_compl, Fintype.card_fin]; omega)
@@ -61,19 +59,6 @@ theorem hasIncidenceIdentity_one_of_card_le_four {u : Fin 14 → (Fin 3 → ZMod
     (disjoint_left.2 fun i hi => mem_compl.1 (hS hi))
     (Bases.hasIncidenceIdentity_zero_of_card_eq_ten
       (by rw [Fintype.card_coe, hS10]) _)
-
-end DavenportProject.CubeFour
-
-end
-
-public section
-
-namespace DavenportProject
-
-open Finset DavenportProject DavenportCompute DavenportProject.CubeFour
-open DavenportProject.CubeFour
-
-open Finset
 
 /-- **Lemma 5.3(1)** (finite computation): every fourteen-term
 sequence over `C_4^3` has an integral `𝓘_1`-identity. -/
@@ -88,10 +73,6 @@ theorem hasIncidenceIdentity_cube_four_fourteen (u : Fin 14 → (Fin 3 → ZMod 
       (by simpa using Checks.chunks14)
     simp only [leaf14, hn3, Bool.not_true, Bool.false_or, List.reverse_reverse] at hleaf
     exact hasIncidenceIdentity_of_sortedCodes hφ hdec (hasIncidenceIdentity_of_check c _ hleaf)
-
-end DavenportProject
-
-end
 
 /-!
 ## Proof of Lemma 5.3(2)
@@ -111,23 +92,17 @@ Proof (with a different normalization than the paper's; finite part by
   2,352 get a stored certificate of one of 64 orbits, moved by a linear map.
 -/
 
-public section
-
-namespace DavenportProject.CubeFour
-
-open Finset DavenportProject DavenportCompute DavenportProject.CubeFour
-
 /-- Lemma 5.3(1) over any index type with fourteen elements. -/
-theorem hasIncidenceIdentity_of_card_eq_fourteen {ι : Type*} [Fintype ι]
+theorem CubeFour.hasIncidenceIdentity_of_card_eq_fourteen {ι : Type*} [Fintype ι]
     (h : Fintype.card ι = 14) (v : ι → (Fin 3 → ZMod 4)) : HasIncidenceIdentity ℤ v 1 := by
   let e : ι ≃ Fin 14 := Fintype.equivFinOfCardEq h
-  have := DavenportProject.hasIncidenceIdentity_comp_equiv _ e
+  have := hasIncidenceIdentity_comp_equiv _ e
     (hasIncidenceIdentity_cube_four_fourteen fun k => v (e.symm k))
   simpa using this
 
 /-- A zero set of size at most four gives an integral `𝓘_2`-identity: fourteen terms outside it
 have an `𝓘_1`-identity (Lemma 5.3(1)), and Lemma 2.2(2) applies. -/
-theorem hasIncidenceIdentity_two_of_card_le_four {u : Fin 18 → (Fin 3 → ZMod 4)}
+theorem CubeFour.hasIncidenceIdentity_two_of_card_le_four {u : Fin 18 → (Fin 3 → ZMod 4)}
     {B : Finset (Fin 18)} (hB : IsZeroSet u B) (hcard : #B ≤ 4) : HasIncidenceIdentity ℤ u 2 := by
   obtain ⟨S, hS, hS14⟩ := exists_subset_card_eq (s := Bᶜ) (n := 14)
     (by rw [card_compl, Fintype.card_fin]; omega)
@@ -137,25 +112,12 @@ theorem hasIncidenceIdentity_two_of_card_le_four {u : Fin 18 → (Fin 3 → ZMod
 
 /-- A zero set with at least fifteen positions gives an integral `𝓘_2`-identity: fourteen of its
 positions have an `𝓘_1`-identity (Lemma 5.3(1)), and Lemma 2.2(3) applies. -/
-theorem hasIncidenceIdentity_of_fifteen_le_card {v : Fin 18 → (Fin 3 → ZMod 4)}
+theorem CubeFour.hasIncidenceIdentity_of_fifteen_le_card {v : Fin 18 → (Fin 3 → ZMod 4)}
     {Z : Finset (Fin 18)} (hZ : IsZeroSet v Z) (hcard : 15 ≤ #Z) : HasIncidenceIdentity ℤ v 2 := by
   obtain ⟨T, hTZ, hT14⟩ := exists_subset_card_eq (s := Z) (n := 14) (by omega)
   have hT : T ⊂ Z := ssubset_of_subset_of_ne hTZ fun h => by rw [h] at hT14; omega
   exact hasIncidenceIdentity_of_ssubset_zeroSet v (by norm_num) Z T hZ hT
     (hasIncidenceIdentity_of_card_eq_fourteen (by rw [Fintype.card_coe, hT14]) _)
-
-end DavenportProject.CubeFour
-
-end
-
-public section
-
-namespace DavenportProject
-
-open Finset DavenportProject DavenportCompute DavenportProject.CubeFour
-open DavenportProject.CubeFour
-
-open Finset
 
 /-- **Lemma 5.3(2)** (finite computation): every
 eighteen-term sequence over `C_4^3` has an integral `𝓘_2`-identity. -/
@@ -177,5 +139,3 @@ theorem hasIncidenceIdentity_cube_four_eighteen (u : Fin 18 → (Fin 3 → ZMod 
     · exact hasIncidenceIdentity_of_check c _ h
 
 end DavenportProject
-
-end

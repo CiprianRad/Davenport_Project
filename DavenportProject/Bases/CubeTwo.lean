@@ -1,15 +1,13 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
 public import DavenportProject.Defs
-public import Mathlib.Data.ZMod.Basic
 import DavenportProject.Bases.Basic
 import DavenportProject.Identities.Operations
-import DavenportProject.Invariants
 import Mathlib.Data.Fin.VecNotation
 
 /-!
@@ -20,19 +18,19 @@ import Mathlib.Data.Fin.VecNotation
 degrees use `η(C_2^3) ≤ 8` and Lemma 2.2(2).
 -/
 
+public section
+
+namespace DavenportProject.Bases
+
+open Finset
+
 /-!
 ## Short zero sets over `C_2^3`
 
 A sequence over `C_2^3` with a zero or a repeated term has a zero set of size at most two;
 every sequence of at least eight terms has a zero or a repetition. In
-particular `η(C_2^3) ≤ 8` (`not_isShortZeroFree_cube_two`).
+particular `η(C_2^3) ≤ 8`.
 -/
-
-public section
-
-namespace DavenportProject.Bases
-
-open Finset DavenportProject
 
 theorem cube_two_add_self (x : Fin 3 → ZMod 2) : x + x = 0 := by
   funext k
@@ -70,21 +68,6 @@ theorem not_injective_and_ne_zero_of_le_card {ι : Type*} [Fintype ι]
   rw [card_ne_zero_cube_two] at this
   omega
 
-/-- `η(C_2^3) ≤ 8`: every eight terms over `C_2^3` contain a zero set
-of size at most `exp = 2`. -/
-theorem not_isShortZeroFree_cube_two (u : Fin 8 → (Fin 3 → ZMod 2)) :
-    ¬ IsShortZeroFree u := by
-  intro h
-  obtain ⟨B, hB, hcard⟩ :=
-    exists_isZeroSet_card_le_two u (not_injective_and_ne_zero_of_le_card u (by simp))
-  have h1 := h B hB
-  have h2 : 1 < AddMonoid.exponent (Fin 3 → ZMod 2) := AddMonoid.one_lt_exponent
-  omega
-
-end DavenportProject.Bases
-
-end
-
 /-!
 ## The Fano configuration
 
@@ -97,12 +80,6 @@ For each of the seven choices of `x` we fix an enumeration `fanoSeq x` of the si
 points and check the identity by kernel `decide`; an arbitrary injective nonzero sequence is a
 reindexing of `fanoSeq x`, and `hasIncidenceIdentity_comp_equiv` transports the identity.
 -/
-
-public section
-
-namespace DavenportProject.Bases
-
-open Finset DavenportProject
 
 /-- The seven nonzero points of `C_2^3`. -/
 private def fanoPoints : List (Fin 3 → ZMod 2) :=
@@ -168,12 +145,8 @@ theorem hasIncidenceIdentity_fano (u : Fin 6 → (Fin 3 → ZMod 2)) (hinj : Fun
   rw [hu]
   exact hasIncidenceIdentity_comp_equiv _ e (hasIncidenceIdentity_fanoSeq x hx0)
 
-end DavenportProject.Bases
-
-end
-
 /-!
-## Theorem B for `m = 2`
+## Proof of Theorem B for `m = 2`
 
 Every sequence of `2t + 4` terms over `C_2^3` has an integral `𝓘_t`-identity, by induction on
 `t` over an arbitrary index type of that cardinality:
@@ -183,12 +156,6 @@ Every sequence of `2t + 4` terms over `C_2^3` has an integral `𝓘_t`-identity,
 * otherwise the terms are distinct and nonzero, so there are at most seven of them; hence
   `t = 1`, the six terms form the Fano configuration, and `hasIncidenceIdentity_fano` applies.
 -/
-
-public section
-
-namespace DavenportProject.Bases
-
-open Finset DavenportProject
 
 /-- Degree zero: four terms over `C_2^3` have an integral `𝓘_0`-identity (`D(C_2^3) = 4`). -/
 theorem hasIncidenceIdentity_zero_of_card_eq_four {ι : Type*} [Fintype ι]
@@ -239,5 +206,3 @@ theorem hasIncidenceIdentity_cube_two (t : ℕ) (u : Fin (2 * (t + 3) - 2) → (
   hasIncidenceIdentity_cube_two_of_card t _ (by rw [Fintype.card_fin]; omega) u
 
 end DavenportProject.Bases
-
-end

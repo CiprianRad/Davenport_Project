@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -22,6 +22,12 @@ Computational definitions shared by the two kernel-checked enumerations of Lemma
 (`checkCert`, with soundness `hasIncidenceIdentity_of_checkCert`).
 -/
 
+@[expose] public section
+
+namespace DavenportProject.CubeThree
+
+open Finset
+
 /-!
 ## Computational definitions for the Lemma 5.1(2) enumeration
 
@@ -39,9 +45,7 @@ every admissible eighth point `h > g` makes the sum zero. The kernel evaluations
 Lemma 5.1(1) certificates) need not wait for the kernel checks.
 -/
 
-@[expose] public section
-
-namespace DavenportProject.CubeThree.Support
+namespace Support
 
 /-- Coordinatewise addition modulo `3` on base-3 codes of points of `(ZMod 3)^3`. -/
 def add3 (a b : ℕ) : ℕ :=
@@ -77,10 +81,6 @@ def checkFrom (a : ℕ) : Bool :=
       allFrom (g + 1) fun h => (mk [g, f, e, d, c, b, a]).testBit h ||
         add3 (add3 (add3 (add3 (add3 (add3 (add3 a b) c) d) e) f) g) h == 0)
 
-end DavenportProject.CubeThree.Support
-
-end
-
 /-!
 ## Generic lemmas for the Lemma 5.1(2) enumeration
 
@@ -88,12 +88,6 @@ Facts about the code arithmetic `add3`/`neg3` and the masks `mk`/`bad` that do n
 the kernel evaluations in `SupportCheck.lean`. The soundness theorem `enumeration` is in
 `Support.lean`.
 -/
-
-public section
-
-namespace DavenportProject.CubeThree.Support
-
-open Finset
 
 theorem of_allFrom {s : ℕ} {P : ℕ → Bool} (h : allFrom s P = true) {k : ℕ} (hs : s ≤ k)
     (hk : k < 27) : P k = true := by
@@ -164,9 +158,7 @@ theorem testBit_mk_of_mem {l : List ℕ} {p : ℕ} (hl : ∀ q ∈ l, q ∈ B) (
 
 end Admissible
 
-end DavenportProject.CubeThree.Support
-
-end
+end Support
 
 /-!
 ## Certificates of integral `𝓘_1`-identities for coded sequences
@@ -181,12 +173,9 @@ of `neg` is an integral `𝓘_1`-identity (`hasIncidenceIdentity_of_checkCert`).
 `CTree` is a binary search tree of certificates keyed by natural numbers.
 -/
 
-@[expose] public section
+namespace Identity
 
-namespace DavenportProject.CubeThree.Identity
-
-open Finset DavenportProject
-open DavenportProject.CubeThree.Support
+open Support
 
 /-- Decoding of a base-3 code into `(ZMod 3)^3`. -/
 def dec (a : ℕ) : Fin 3 → ZMod 3 := fun i => ((a / 3 ^ (i : ℕ) : ℕ) : ZMod 3)
@@ -196,7 +185,7 @@ def msum : List ℕ → ℕ → ℕ
   | [], _ => 0
   | a :: L, m => if m % 2 = 1 then add3 a (msum L (m / 2)) else msum L (m / 2)
 
-/-- The certificate test (see the module docstring). -/
+/-- The certificate test (see the section docstring). -/
 def checkCert (L pos neg : List ℕ) : Bool :=
   pos.length == neg.length + 1 &&
     (pos ++ neg).all (fun m => msum L m == 0 && (List.range L.length).any (fun i => m.testBit i))
@@ -215,17 +204,6 @@ def CTree.find : CTree → ℕ → Option (List ℕ × List ℕ)
 
 /-- The set of positions `i < n` whose bit is set in `m`. -/
 def toSet (n m : ℕ) : Finset (Fin n) := univ.filter fun i => m.testBit i
-
-end DavenportProject.CubeThree.Identity
-
-end
-
-public section
-
-namespace DavenportProject.CubeThree.Identity
-
-open Finset DavenportProject
-open DavenportProject.CubeThree.Support
 
 theorem natCast_eq_of_mod {n m : ℕ} (h : n % 3 = m % 3) : (n : ZMod 3) = m :=
   (ZMod.natCast_eq_natCast_iff' n m 3).2 h
@@ -305,7 +283,7 @@ theorem hasIncidenceIdentity_of_checkCert {n : ℕ} (f : Fin n → ℕ) {pos neg
   have hZ : ∀ m ∈ pos ++ neg, toSet n m ∈ zeroSets u := by
     intro m hm
     obtain ⟨h0, i, hi, hb⟩ := hall m hm
-    rw [DavenportProject.mem_zeroSets]
+    rw [mem_zeroSets]
     exact isZeroSet_toSet f h0 ⟨i, hi, hb⟩
   have hP : ∀ m ∈ pos, toSet n m ∈ zeroSets u := fun m hm => hZ m (List.mem_append_left _ hm)
   have hN : ∀ m ∈ neg, toSet n m ∈ zeroSets u := fun m hm => hZ m (List.mem_append_right _ hm)
@@ -322,6 +300,6 @@ theorem hasIncidenceIdentity_of_checkCert {n : ℕ} (f : Fin n → ℕ) {pos neg
     simp only [singleton_subset_iff, mem_toSet, Bool.decide_eq_true]
     rw [hmom i i.isLt, sub_self]
 
-end DavenportProject.CubeThree.Identity
+end Identity
 
-end
+end DavenportProject.CubeThree

@@ -1,17 +1,14 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
 public import DavenportProject.Defs
-public import Mathlib.Data.ZMod.Basic
-import DavenportProject.Bases.Basic
 import DavenportProject.Bases.CubeFour.Eta
 import DavenportProject.Bases.CubeFour.Quaternary
 import DavenportProject.Identities.Operations
-import DavenportProject.Invariants
 
 /-!
 # Theorem B for `m = 4`
@@ -31,7 +28,7 @@ public section
 
 namespace DavenportProject.Bases
 
-open Finset DavenportProject
+open Finset
 
 /-- Theorem B for `m = 4`, over an arbitrary index type with `4t + 10` positions. -/
 theorem hasIncidenceIdentity_cube_four_of_card (t : ℕ) :
@@ -72,5 +69,3 @@ theorem hasIncidenceIdentity_cube_four (t : ℕ) (u : Fin (4 * (t + 3) - 2) → 
   hasIncidenceIdentity_cube_four_of_card t _ (by rw [Fintype.card_fin]; omega) u
 
 end DavenportProject.Bases
-
-end

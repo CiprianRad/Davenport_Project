@@ -1,14 +1,13 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
 public import DavenportProject.Defs
 import Mathlib.Data.Nat.Choose.Sum
 import Mathlib.Tactic.LinearCombination
-import Mathlib.Tactic.Ring
 
 /-!
 # Lemma 2.2: three constructions of identities
@@ -20,14 +19,6 @@ import Mathlib.Tactic.Ring
   subsequence of a zero set.
 -/
 
-/-!
-## Proof of Lemma 2.2(1)
-
-The identity is the inclusion–exclusion one: for every nonempty `S ⊆ Fin (t + 1)` the union
-`⋃_{k ∈ S} B k` is a zero set, and it receives the weight `(-1) ^ (#S + 1)`. Weights of repeated
-unions add up.
--/
-
 public section
 
 namespace DavenportProject
@@ -35,6 +26,94 @@ namespace DavenportProject
 open Finset
 
 variable {G : Type*} [AddCommGroup G] {ι : Type*}
+
+/-!
+## Transport of zero sets between a subsequence and the full sequence
+
+For `S : Finset ι`, the subsequence `fun i : S => u i` has zero sets `E : Finset S`; these
+correspond to the zero sets of `u` contained in `S` via `E ↦ E.map (Embedding.subtype _)`.
+We also record a reweighting lemma: given a weight function on finsets of `ι` defined as a
+sum of indicator terms over a family `E ↦ g E`, sums against it reduce to sums over the
+indexing family (so junk values of the old weights are never read). Finally, an
+inclusion–exclusion formula for disjointness is used in Lemma 2.2(3).
+-/
+
+namespace Identities
+
+/-- Lift a finset of the subtype `↥S` to a finset of `ι`. -/
+abbrev liftSub (S : Finset ι) (E : Finset S) : Finset ι :=
+  E.map (Function.Embedding.subtype (· ∈ S))
+
+theorem mem_liftSub {S : Finset ι} {E : Finset S} {x : ι} :
+    x ∈ liftSub S E ↔ ∃ h : x ∈ S, (⟨x, h⟩ : S) ∈ E := by
+  simp [liftSub]
+
+theorem liftSub_subset (S : Finset ι) (E : Finset S) : liftSub S E ⊆ S := by
+  intro x hx
+  obtain ⟨h, -⟩ := mem_liftSub.1 hx
+  exact h
+
+theorem disjoint_liftSub {S B : Finset ι} (hSB : Disjoint S B) (E : Finset S) :
+    Disjoint (liftSub S E) B :=
+  hSB.mono_left (liftSub_subset S E)
+
+/-- Zero sets of the subsequence correspond to zero sets of `u` (after lifting). -/
+theorem isZeroSet_liftSub_iff (u : ι → G) (S : Finset ι) (E : Finset S) :
+    IsZeroSet u (liftSub S E) ↔ IsZeroSet (fun i : S => u i) E := by
+  simp [IsZeroSet, liftSub, Finset.sum_map]
+
+/-- The disjoint union of two zero sets is a zero set. -/
+theorem isZeroSet_union {u : ι → G} {E F : Finset ι} [DecidableEq ι] (hE : IsZeroSet u E)
+    (hF : IsZeroSet u F) (h : Disjoint E F) : IsZeroSet u (E ∪ F) :=
+  ⟨hE.1.mono subset_union_left, by rw [sum_union h, hE.2, hF.2, add_zero]⟩
+
+/-- Reweighting: if `c' F = ∑_{E ∈ A} [g E = F] * c E`, and every `g E` lies in `Z`, then
+`∑_{F ∈ Z} c' F * f F = ∑_{E ∈ A} c E * f (g E)`. -/
+theorem sum_mul_reweight {α β R : Type*} [CommRing R] [DecidableEq β] (Z : Finset β)
+    (A : Finset α) (g : α → β) (hg : ∀ E ∈ A, g E ∈ Z) (c : α → R) (f : β → R) :
+    ∑ F ∈ Z, (∑ E ∈ A, if g E = F then c E else 0) * f F = ∑ E ∈ A, c E * f (g E) := by
+  simp_rw [sum_mul]
+  rw [sum_comm]
+  refine sum_congr rfl fun E hE => ?_
+  simp_rw [ite_mul, zero_mul]
+  rw [sum_ite_eq]
+  simp [hg E hE]
+
+/-- Inclusion–exclusion for disjointness, weighted by `c`:
+`∑_E c E [J' ∩ E = ∅] = ∑_{K ⊆ J'} (-1)^{#K} ∑_{E ⊇ K} c E`. -/
+theorem sum_ite_disjoint_eq {α β : Type*} [DecidableEq α] (A : Finset (Finset α))
+    (c : Finset α → β) [CommRing β] (J' : Finset α) :
+    ∑ E ∈ A, (if Disjoint J' E then c E else 0) =
+      ∑ K ∈ J'.powerset, ((-1 : ℤ) ^ #K : β) * ∑ E ∈ A with K ⊆ E, c E := by
+  have h : ∀ E : Finset α, (if Disjoint J' E then (1 : ℤ) else 0) =
+      ∑ K ∈ J'.powerset, if K ⊆ E then (-1 : ℤ) ^ #K else 0 := by
+    intro E
+    rw [← sum_filter]
+    have : J'.powerset.filter (· ⊆ E) = (J' ∩ E).powerset := by
+      ext K; simp [subset_inter_iff]
+    rw [this, sum_powerset_neg_one_pow_card]
+    simp only [disjoint_iff_inter_eq_empty]
+  simp_rw [mul_sum, sum_filter]
+  rw [sum_comm]
+  refine sum_congr rfl fun E _ => ?_
+  have := congrArg (fun z : ℤ => (z : β) * c E) (h E)
+  simp only [Int.cast_sum, apply_ite (Int.cast : ℤ → β), Int.cast_one, Int.cast_zero, ite_mul,
+    one_mul, zero_mul, sum_mul] at this
+  rw [this]
+  refine sum_congr rfl fun K _ => ?_
+  split_ifs <;> simp
+
+end Identities
+
+open Identities
+
+/-!
+## Proof of Lemma 2.2(1)
+
+The identity is the inclusion–exclusion one: for every nonempty `S ⊆ Fin (t + 1)` the union
+`⋃_{k ∈ S} B k` is a zero set, and it receives the weight `(-1) ^ (#S + 1)`. Weights of repeated
+unions add up.
+-/
 
 /-- **Lemma 2.2(1)**: `t + 1` pairwise disjoint zero sets give an
 integral `𝓘_t`-identity. -/
@@ -160,79 +239,7 @@ theorem hasIncidenceIdentity_of_pairwise_disjoint [Fintype ι] (u : ι → G) (t
       · simp [tog, hk]
       · simp [tog, hk]
 
-end DavenportProject
-
-end
-
-/-!
-## Transport of zero sets between a subsequence and the full sequence
-
-For `S : Finset ι`, the subsequence `fun i : S => u i` has zero sets `E : Finset S`; these
-correspond to the zero sets of `u` contained in `S` via `E ↦ E.map (Embedding.subtype _)`.
-We also record a reweighting lemma: given a weight function on finsets of `ι` defined as a
-sum of indicator terms over a family `E ↦ g E`, sums against it reduce to sums over the
-indexing family (so junk values of the old weights are never read).
--/
-
-public section
-
-namespace DavenportProject.Identities
-
-open Finset
-
-variable {G : Type*} [AddCommGroup G] {ι : Type*}
-
-/-- Lift a finset of the subtype `↥S` to a finset of `ι`. -/
-abbrev liftSub (S : Finset ι) (E : Finset S) : Finset ι :=
-  E.map (Function.Embedding.subtype (· ∈ S))
-
-theorem mem_liftSub {S : Finset ι} {E : Finset S} {x : ι} :
-    x ∈ liftSub S E ↔ ∃ h : x ∈ S, (⟨x, h⟩ : S) ∈ E := by
-  simp [liftSub]
-
-theorem liftSub_subset (S : Finset ι) (E : Finset S) : liftSub S E ⊆ S := by
-  intro x hx
-  obtain ⟨h, -⟩ := mem_liftSub.1 hx
-  exact h
-
-theorem disjoint_liftSub {S B : Finset ι} (hSB : Disjoint S B) (E : Finset S) :
-    Disjoint (liftSub S E) B :=
-  hSB.mono_left (liftSub_subset S E)
-
-/-- Zero sets of the subsequence correspond to zero sets of `u` (after lifting). -/
-theorem isZeroSet_liftSub_iff (u : ι → G) (S : Finset ι) (E : Finset S) :
-    IsZeroSet u (liftSub S E) ↔ IsZeroSet (fun i : S => u i) E := by
-  simp [IsZeroSet, liftSub, Finset.sum_map]
-
-/-- The disjoint union of two zero sets is a zero set. -/
-theorem isZeroSet_union {u : ι → G} {E F : Finset ι} [DecidableEq ι] (hE : IsZeroSet u E)
-    (hF : IsZeroSet u F) (h : Disjoint E F) : IsZeroSet u (E ∪ F) :=
-  ⟨hE.1.mono subset_union_left, by rw [sum_union h, hE.2, hF.2, add_zero]⟩
-
-/-- Reweighting: if `c' F = ∑_{E ∈ A} [g E = F] * c E`, and every `g E` lies in `Z`, then
-`∑_{F ∈ Z} c' F * f F = ∑_{E ∈ A} c E * f (g E)`. -/
-theorem sum_mul_reweight {α β R : Type*} [CommRing R] [DecidableEq β] (Z : Finset β)
-    (A : Finset α) (g : α → β) (hg : ∀ E ∈ A, g E ∈ Z) (c : α → R) (f : β → R) :
-    ∑ F ∈ Z, (∑ E ∈ A, if g E = F then c E else 0) * f F = ∑ E ∈ A, c E * f (g E) := by
-  simp_rw [sum_mul]
-  rw [sum_comm]
-  refine sum_congr rfl fun E hE => ?_
-  simp_rw [ite_mul, zero_mul]
-  rw [sum_ite_eq]
-  simp [hg E hE]
-
-end DavenportProject.Identities
-
-end
-
-public section
-
-namespace DavenportProject
-
-open Finset
-open DavenportProject.Identities
-
-variable {G : Type*} [AddCommGroup G] {ι : Type*}
+/-! ## Proof of Lemma 2.2(2) -/
 
 /-- **Lemma 2.2(2)**: for `t ≥ 1`, a zero set `B` together with an
 integral `𝓘_{t-1}`-identity on a subsequence disjoint from `B` gives an integral
@@ -333,10 +340,6 @@ theorem hasIncidenceIdentity_of_disjoint_zeroSet [Fintype ι] (u : ι → G) {t 
         simp only [h2, h3, ite_false, sum_const_zero]
         simp
 
-end DavenportProject
-
-end
-
 /-!
 ## Proof of Lemma 2.2(3)
 
@@ -344,53 +347,6 @@ With `s = (-1) ^ t` and `c` the old identity on `T` (read only on the zero sets 
 subsequence), the new weights are `c E` on `lift E`, `-s * c E` on `Z \ lift E`, and `s` on `Z`.
 The moment conditions are checked directly via inclusion–exclusion.
 -/
-
-public section
-
-namespace DavenportProject.Identities
-
-open Finset DavenportProject.Identities
-
-variable {G : Type*} [AddCommGroup G] {ι : Type*}
-
-/-- Inclusion–exclusion for disjointness, weighted by `c`:
-`∑_E c E [J' ∩ E = ∅] = ∑_{K ⊆ J'} (-1)^{#K} ∑_{E ⊇ K} c E`. -/
-theorem sum_ite_disjoint_eq {α β : Type*} [DecidableEq α] (A : Finset (Finset α))
-    (c : Finset α → β) [CommRing β] (J' : Finset α) :
-    ∑ E ∈ A, (if Disjoint J' E then c E else 0) =
-      ∑ K ∈ J'.powerset, ((-1 : ℤ) ^ #K : β) * ∑ E ∈ A with K ⊆ E, c E := by
-  have h : ∀ E : Finset α, (if Disjoint J' E then (1 : ℤ) else 0) =
-      ∑ K ∈ J'.powerset, if K ⊆ E then (-1 : ℤ) ^ #K else 0 := by
-    intro E
-    rw [← sum_filter]
-    have : J'.powerset.filter (· ⊆ E) = (J' ∩ E).powerset := by
-      ext K; simp [subset_inter_iff]
-    rw [this, sum_powerset_neg_one_pow_card]
-    simp only [disjoint_iff_inter_eq_empty]
-  simp_rw [mul_sum, sum_filter]
-  rw [sum_comm]
-  refine sum_congr rfl fun E _ => ?_
-  have := congrArg (fun z : ℤ => (z : β) * c E) (h E)
-  simp only [Int.cast_sum, apply_ite (Int.cast : ℤ → β), Int.cast_one, Int.cast_zero, ite_mul,
-    one_mul, zero_mul, sum_mul] at this
-  rw [this]
-  refine sum_congr rfl fun K _ => ?_
-  split_ifs <;> simp
-
-end DavenportProject.Identities
-
-end
-
-public section
-
-namespace DavenportProject
-
-open Finset DavenportProject.Identities
-open DavenportProject.Identities
-
-open Finset
-
-variable {G : Type*} [AddCommGroup G] {ι : Type*}
 
 /-- **Lemma 2.2(3)**: for `t ≥ 1`, an integral `𝓘_{t-1}`-identity on a
 proper subsequence `T ⊊ Z` of a zero set `Z` gives an integral `𝓘_t`-identity. -/
@@ -511,5 +467,3 @@ theorem hasIncidenceIdentity_of_ssubset_zeroSet [Fintype ι] (u : ι → G) {t :
       linear_combination (-∑ E ∈ Z' with J' ⊆ E, c E) * hss
 
 end DavenportProject
-
-end

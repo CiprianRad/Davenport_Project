@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -15,15 +15,9 @@ import Mathlib.Tactic.FinCases
 /-!
 # Linear normalization over `C_3^3`
 
-Injective additive maps preserve zero sets and identities (`hasIncidenceIdentity_of_comp`); a matrix
-over `ZMod 3` with nonzero determinant gives such a map sending its rows to the standard basis.
--/
-
-/-!
-## Linear normalization for Lemma 5.1(1)
-
-An injective additive endomorphism `φ` of `G` does not change the zero sets of a sequence, so
-`u` and `φ ∘ u` have the same incidence identities (`hasIncidenceIdentity_of_comp`).
+Linear normalization for Lemma 5.1(1). An injective additive endomorphism `φ` of `G` does not
+change the zero sets of a sequence, so `u` and `φ ∘ u` have the same incidence identities
+(`hasIncidenceIdentity_of_comp`).
 
 For a matrix `M` over `ZMod 3` with `det M ≠ 0`, `v ↦ v ᵥ* (det M • adj M)` is such a
 map, and it sends the row `M j` to the basis vector `Pi.single j 1` (`exists_addHom_of_det`).
@@ -35,7 +29,7 @@ public section
 
 namespace DavenportProject.CubeThree.Identity
 
-open Finset DavenportProject Matrix
+open Matrix
 
 variable {G : Type*} [AddCommGroup G] {ι : Type*}
 
@@ -52,8 +46,7 @@ theorem hasIncidenceIdentity_of_comp [Fintype ι] {R : Type*} [CommRing R] {t : 
     (h : HasIncidenceIdentity R (fun i => φ (u i)) t) : HasIncidenceIdentity R u t := by
   have hZ : zeroSets (fun i => φ (u i)) = zeroSets u := by
     ext E
-    rw [DavenportProject.mem_zeroSets, DavenportProject.mem_zeroSets,
-      isZeroSet_comp_iff φ hφ]
+    rw [mem_zeroSets, mem_zeroSets, isZeroSet_comp_iff φ hφ]
   obtain ⟨c, hc⟩ := h
   refine ⟨c, ?_⟩
   unfold IsIncidenceIdentity at hc ⊢
@@ -118,5 +111,3 @@ theorem det_e₁_e₂ (w : Fin 3 → ZMod 3) :
   simp
 
 end DavenportProject.CubeThree.Identity
-
-end

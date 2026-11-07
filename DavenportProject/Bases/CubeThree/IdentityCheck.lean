@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -12,10 +12,6 @@ import Mathlib.Tactic.IntervalCases
 # Kernel check for Lemma 5.1(1)
 
 The finite enumeration behind Lemma 5.1(1), evaluated by the kernel (`decide +kernel`).
--/
-
-/-!
-## Kernel-checked enumeration for Lemma 5.1(1)
 
 A normalized case is a non-decreasing list of ten codes `1, 1, 3, 3, a₄, …, a₉`
 (`1 = e₁`, `3 = e₂`, `9 = e₃`) of a sequence without zero sets of size at most three.
@@ -27,15 +23,14 @@ is excluded:
   three with the entries of `l` (or is `0`).
 
 `tail a₄` walks through all such lists with fourth entry `a₄` and tests at each leaf the
-certificate stored in `certTree` under `key l`. It is evaluated by the kernel
-(`decide +kernel`), one declaration per value of `a₄`.
+certificate stored in `certTree` under `key l`, one declaration per value of `a₄`.
 -/
 
 @[expose] public section
 
 namespace DavenportProject.CubeThree.Identity
 
-open DavenportProject.CubeThree.Support
+open Support
 
 /-- Appending `b` to the codes `l` (most recent first) is excluded. -/
 def skip : List ℕ → ℕ → Bool
@@ -105,5 +100,3 @@ theorem tail4_eq_true {a : ℕ} (h3 : 3 ≤ a) (h27 : a < 27) : tail4 a = true :
     tail4_21, tail4_22, tail4_23, tail4_24, tail4_25, tail4_26]
 
 end DavenportProject.CubeThree.Identity
-
-end

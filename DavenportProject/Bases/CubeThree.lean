@@ -1,17 +1,15 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
 public import DavenportProject.Defs
-public import Mathlib.Data.ZMod.Basic
 import DavenportProject.Bases.Basic
 import DavenportProject.Bases.CubeThree.Identity
 import DavenportProject.Bases.CubeThree.LongZeroSet
 import DavenportProject.Identities.Operations
-import DavenportProject.Invariants
 
 /-!
 # Theorem B for `m = 3`
@@ -20,6 +18,13 @@ import DavenportProject.Invariants
 `𝓘_t`-identity, from Lemmas 5.1 and 5.2, `η(C_3^3) ≤ 17` and Lemma 2.2.
 -/
 
+public section
+
+namespace DavenportProject.Bases
+
+open Finset
+open CubeThree (allowed_image allowed_spec card_filter_le_two exponent_eq_three)
+
 /-!
 ## Short zero sets over `C_3^3`
 
@@ -27,14 +32,6 @@ A short-zero-free sequence over `C_3^3` has every multiplicity at most two (thre
 sum to zero) and, by Lemma 5.1(2), a support of at most eight points. So it has at most
 sixteen terms: `η(C_3^3) ≤ 17` (`not_isShortZeroFree_cube_three`).
 -/
-
-public section
-
-namespace DavenportProject.Bases
-
-open Finset DavenportProject
-open DavenportProject.CubeThree
-  (allowed_image allowed_spec card_filter_le_two)
 
 /-- `η(C_3^3) ≤ 17`: every seventeen terms over `C_3^3` contain a zero
 set of size at most `exp = 3`. -/
@@ -48,10 +45,6 @@ theorem not_isShortZeroFree_cube_three (u : Fin 17 → (Fin 3 → ZMod 3)) :
     sum_le_sum fun x _ => card_filter_le_two hu x
   rw [sum_const, smul_eq_mul] at hle
   omega
-
-end DavenportProject.Bases
-
-end
 
 /-!
 ## Theorem B for `m = 3`
@@ -69,14 +62,6 @@ Every sequence of `3t + 7` terms over `C_3^3` has an integral `𝓘_t`-identity,
     sequence is a zero set properly containing thirteen indices; apply Lemma 2.2(3);
   * `t ≥ 4`: impossible, since `η(C_3^3) ≤ 17`.
 -/
-
-public section
-
-namespace DavenportProject.Bases
-
-open Finset DavenportProject
-open DavenportProject.CubeThree
-  (allowed_image allowed_spec card_filter_le_two exponent_eq_three)
 
 /-- A sequence over `C_3^3` that is not short-zero-free has a zero set of size at most three. -/
 theorem exists_isZeroSet_card_le_three {ι : Type*} {u : ι → (Fin 3 → ZMod 3)}
@@ -192,5 +177,3 @@ theorem hasIncidenceIdentity_cube_three (t : ℕ)
   hasIncidenceIdentity_cube_three_of_card t _ (by rw [Fintype.card_fin]; omega) u
 
 end DavenportProject.Bases
-
-end

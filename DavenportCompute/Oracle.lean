@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -16,11 +16,15 @@ The search (`oracle14`, `oracleLong`, `oracle18`) is untrusted: its answers are 
 `check` or `longZero`. The leaf tests `leaf14` and `leaf18` are what the native checks evaluate.
 -/
 
-/-!
-## Untrusted certificate search for Lemma 5.3
+@[expose] public section
 
-Nothing in this file is trusted: every certificate it returns is re-checked by `check` (or
-`longZero`), whose soundness is proved. A wrong answer can only make the computation fail.
+namespace DavenportCompute
+
+/-!
+## Untrusted certificate search
+
+The soundness of `check` and `longZero` is proved, so a wrong answer of the search can only make
+the computation fail.
 
 * `findSmall l σ`: a mask of at most three positions whose entries sum to `σ`. With `σ` the
   sum of all entries, its complement is a zero set of at least `n - 3` positions.
@@ -31,10 +35,6 @@ Nothing in this file is trusted: every certificate it returns is re-checked by `
   standard basis whose sorted image is a stored orbit representative; the representative's
   certificate is moved back along the sorting permutation.
 -/
-
-@[expose] public section
-
-namespace DavenportCompute
 
 /-- The sums of all sub-masks of the positions of `l` (index = mask). -/
 def subsetSums (l : Array Nat) : Array Nat := Id.run do
@@ -155,10 +155,6 @@ def parseTable (s : String) : Std.HashMap (List Nat) Cert :=
     | some (k, c) => t.insert k c
     | none => t) {}
 
-end DavenportCompute
-
-end
-
 /-!
 ## Leaf tests and the split of the enumeration into chunks
 
@@ -172,10 +168,6 @@ A leaf is a completed list `acc` of codes, most recent first, so its sequence is
 whose `mix` value is `i` modulo `k`. These only organize the computation into independent
 `native_decide` checks.
 -/
-
-@[expose] public section
-
-namespace DavenportCompute
 
 /-- The hard fourteen-term representatives. -/
 def table14 : Std.HashMap (List Nat) Cert := parseTable data14
@@ -235,5 +227,3 @@ def mix (p : List Nat) : Nat := p.foldl (fun a x => a * 131 + x + 7) 0
 def chunk (k i : Nat) (P : List (List Nat)) : List (List Nat) := P.filter fun p => mix p % k == i
 
 end DavenportCompute
-
-end

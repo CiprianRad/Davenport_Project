@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -9,16 +9,16 @@ module
 # Codes, sets and the enumeration (computation library for Lemma 5.3)
 
 This library has no Mathlib dependency and is compiled to native code (`precompileModules`), so that
-`native_decide` evaluates it at native speed. Its soundness is proved in
+`native_decide` evaluates the finite input of Lemma 5.3 at native speed. Its soundness is proved in
 `DavenportProject.Bases.CubeFour`.
 -/
 
-/-!
-## Codes for `C_4^3`, and sets of codes (Lemma 5.3 computations)
+@[expose] public section
 
-This library is Mathlib-free and compiled to native code (`precompileModules`), because the
-finite input of Lemma 5.3 is evaluated by `native_decide`. Its soundness
-theorems are in `DavenportProject.CubeFour`.
+namespace DavenportCompute
+
+/-!
+## Codes for `C_4^3`, and sets of codes
 
 * The element `(x₀, x₁, x₂)` of `(ZMod 4)^3` has the code `x₀ + 4 x₁ + 16 x₂ < 64`; `add4` and
   `neg4` are addition and negation on codes.
@@ -29,10 +29,6 @@ theorems are in `DavenportProject.CubeFour`.
 * For a list `p` of codes, `R1 p`, `R2 p` and `R3 p` are the sets of sums of one, two and three
   entries of `p` at distinct positions (sums over sublists of length `1`, `2`, `3`).
 -/
-
-@[expose] public section
-
-namespace DavenportCompute
 
 /-- The code of the sum of the elements with codes `a` and `b`. -/
 def add4 (a b : Nat) : Nat :=
@@ -85,10 +81,6 @@ def codeSum : List Nat → Nat
   | [] => 0
   | x :: p => add4 x (codeSum p)
 
-end DavenportCompute
-
-end
-
 /-!
 ## The certificate checker for integral incidence identities over `C_m^3`
 
@@ -101,10 +93,6 @@ that the coefficients sum to one, and that all moments of degree `1 ≤ |J| ≤ 
 
 `longZero l Z` tests that the mask `Z` is a zero set of `l` with at least fifteen positions.
 -/
-
-@[expose] public section
-
-namespace DavenportCompute
 
 /-- A certificate: pairs `(mask, c_E)`; repeated masks are allowed, their coefficients add up. -/
 abbrev Cert := List (Nat × Int)
@@ -146,10 +134,6 @@ def popcountBelow (n Z : Nat) : Nat := (List.range n).countP (Z.testBit ·)
 def longZero (l : List Nat) (Z : Nat) : Bool :=
   isZeroMask 4 l Z && decide (15 ≤ popcountBelow l.length Z)
 
-end DavenportCompute
-
-end
-
 /-!
 ## The enumeration of normalized short-zero-free sequences over `C_4^3`
 
@@ -165,11 +149,7 @@ often as `1`, every entry with `P2 x` at most as often as `4`, and every entry w
 most as often as `16`.
 -/
 
-@[expose] public section
-
-namespace DavenportCompute
-
-/-- Appending `x` is excluded (see the module docstring). -/
+/-- Appending `x` is excluded (see the section docstring). -/
 def skip (r1 r2 r3 : UInt64) (x : Nat) : Bool :=
   mem (r1 ||| r2 ||| r3) (neg4 x) ||
     (P1 x && x != 1 && !mem r1 1) || (P2 x && x != 4 && !mem r1 4) ||
@@ -180,7 +160,7 @@ def allFrom (f : Nat → Bool) : Nat → Nat → Bool
   | _, 0 => true
   | x, n + 1 => f x && allFrom f (x + 1) n
 
-/-- The enumeration (see the module docstring). -/
+/-- The enumeration (see the section docstring). -/
 def gdfs (leaf : List Nat → Bool) : Nat → Nat → List Nat → UInt64 → UInt64 → UInt64 → Bool
   | 0, _, acc, _, _, _ => leaf acc
   | n + 1, lo, acc, r1, r2, r3 =>
@@ -188,7 +168,7 @@ def gdfs (leaf : List Nat → Bool) : Nat → Nat → List Nat → UInt64 → UI
       gdfs leaf n x (x :: acc) (r1 ||| bit x) (r2 ||| shiftSet r1 x) (r3 ||| shiftSet r2 x))
       lo (64 - lo)
 
-/-- The multiplicity normalization (see the module docstring). -/
+/-- The multiplicity normalization (see the section docstring). -/
 def n3cond (acc : List Nat) : Bool :=
   acc.all fun x => (!P1 x || decide (acc.count x ≤ acc.count 1)) &&
     (!P2 x || decide (acc.count x ≤ acc.count 4)) && (!P3 x || decide (acc.count x ≤ acc.count 16))
@@ -198,5 +178,3 @@ def gdfsFrom (leaf : List Nat → Bool) (n : Nat) (acc : List Nat) : Bool :=
   gdfs leaf n (acc.headD 1) acc (R1 acc) (R2 acc) (R3 acc)
 
 end DavenportCompute
-
-end

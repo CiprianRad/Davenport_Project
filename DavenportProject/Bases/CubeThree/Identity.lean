@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: George C. Rad
+Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 -/
 module
 
@@ -26,6 +26,12 @@ normalization and sorting reduce to the kernel-checked enumeration of
 `Bases.CubeThree.IdentityCheck`.
 -/
 
+public section
+
+namespace DavenportProject
+
+open Finset CubeThree.Identity CubeThree.Support
+
 /-!
 ## Soundness of the enumeration for Lemma 5.1(1)
 
@@ -38,12 +44,7 @@ Each level of the enumeration is discharged by `step`: an admissible next code i
 skipped. The leaf is discharged by `leaf_sound`, the soundness of the certificate test.
 -/
 
-public section
-
-namespace DavenportProject.CubeThree.Identity
-
-open Finset DavenportProject
-open DavenportProject.CubeThree.Support
+namespace CubeThree.Identity
 
 theorem add3_add3_self (a : ℕ) : add3 (add3 a a) a = 0 := by
   obtain ⟨h1, h2, h3⟩ := add3_digits a a
@@ -274,10 +275,6 @@ theorem enumeration (c : Fin 10 → ℕ) (hc : ∀ i, c i < 27) (hmono : Monoton
     (fun e e' => no3 7 8 9 (by decide) (by decide) (by decide) (e'.trans e) e.symm)
   exact leaf_sound H c (by simp [List.ofFn_succ, c0, c1, c2, c3])
 
-end DavenportProject.CubeThree.Identity
-
-end
-
 /-!
 ## Reduction to the enumeration for Lemma 5.1(1)
 
@@ -290,12 +287,6 @@ which two distinct values `x ≠ y` occur twice each.
 * `hasIncidenceIdentity_of_normalized`: after sorting the positions by the codes `enc` of the
   terms (`Tuple.sort`), the code sequence satisfies the hypotheses of `enumeration`.
 -/
-
-public section
-
-namespace DavenportProject.CubeThree.Identity
-
-open Finset DavenportProject
 
 /-- The base-3 code of a point of `(ZMod 3)^3`. -/
 def enc (x : Fin 3 → ZMod 3) : ℕ := (x 0).val + 3 * (x 1).val + 9 * (x 2).val
@@ -338,15 +329,14 @@ theorem hasIncidenceIdentity_of_normalized (v : Fin 10 → (Fin 3 → ZMod 3))
   have hdc : (fun i => dec (enc (v (σ i)))) = fun i => v (σ i) := funext fun i => dec_enc _
   have hv : v = fun i => (fun j => v (σ j)) (σ.symm i) := funext fun i => by simp
   rw [hv]
-  refine DavenportProject.hasIncidenceIdentity_comp_equiv (R := ℤ) (fun j => v (σ j))
-    σ.symm ?_
+  refine hasIncidenceIdentity_comp_equiv (R := ℤ) (fun j => v (σ j)) σ.symm ?_
   rw [← hdc]
   have hcode : ∀ {i : Fin 10} {x : Fin 3 → ZMod 3}, v i = x →
       enc (v (σ (σ.symm i))) = enc x := by
     intro i x h
     simp [h]
   refine enumeration (fun i => enc (v (σ i))) (fun i => enc_lt _) hmono (fun E hE => ?_) ?_ ?_ ?_
-  · rw [hdc, ← DavenportProject.isZeroSet_map_equiv] at hE
+  · rw [hdc, ← isZeroSet_map_equiv] at hE
     simpa using hshort _ hE
   · obtain ⟨i, j, hij, hi, hj⟩ := h1
     exact ⟨σ.symm i, σ.symm j, σ.symm.injective.ne hij, hcode hi, hcode hj⟩
@@ -401,10 +391,6 @@ theorem hasIncidenceIdentity_of_doubled (u : Fin 10 → (Fin 3 → ZMod 3))
   · simp only [not_exists, not_not] at hw
     exact hasIncidenceIdentity_of_normalized u₁ hshort₁ h1 h2 (Or.inr hw)
 
-end DavenportProject.CubeThree.Identity
-
-end
-
 /-!
 ## Proof of Lemma 5.1(1)
 
@@ -418,15 +404,9 @@ Proof (with a smaller normalization than the paper's):
   `e₁, e₂` and, if possible, a third term to `e₃` (`hasIncidenceIdentity_of_doubled`). After
   sorting by codes, the 3,382 resulting cases are checked by the kernel against explicit
   certificates (`IdentityCheck`, `IdentityData`, and `enumeration` above): 2,209 disjoint pairs
-  of zero sets, 1,137
-  identities with five zero sets and 36 with seven, all with coefficients `±1`.
+  of zero sets, 1,137 identities with five zero sets and 36 with seven, all with coefficients
+  `±1`.
 -/
-
-public section
-
-namespace DavenportProject.CubeThree.Identity
-
-open Finset DavenportProject
 
 /-- `D(C_3^3) = 7`: every seven-term sequence over `(ZMod 3)^3` has a zero set. -/
 theorem exists_isZeroSet_seven (v : Fin 7 → (Fin 3 → ZMod 3)) : ∃ E, IsZeroSet v E := by
@@ -508,18 +488,7 @@ theorem exists_doubled (u : Fin 10 → (Fin 3 → ZMod 3)) (hshort : ∀ E, IsZe
     exact ⟨i, j, hij, hi, hj⟩
   exact ⟨x, y, hxy, hpair x hx, hpair y hy⟩
 
-end DavenportProject.CubeThree.Identity
-
-end
-
-public section
-
-namespace DavenportProject
-
-open Finset DavenportProject
-open DavenportProject.CubeThree.Identity
-
-open Finset
+end CubeThree.Identity
 
 /-- **Lemma 5.1(1)** (finite computation): every ten-term sequence over
 `C_3^3` has an integral `𝓘_1`-identity. -/
@@ -534,5 +503,3 @@ theorem hasIncidenceIdentity_cube_three_ten (u : Fin 10 → (Fin 3 → ZMod 3)) 
     exact hasIncidenceIdentity_of_doubled u hshort hxy hx hy
 
 end DavenportProject
-
-end
