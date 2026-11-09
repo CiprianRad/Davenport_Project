@@ -14,7 +14,7 @@ public import Mathlib.GroupTheory.Exponent
 The basic notions of the paper, for a sequence `u : ι → G` in an abelian group `G`:
 * `IsZeroSet u E`, `zeroSets u`: the nonempty sets of positions with sum zero;
 * `IsIncidenceIdentity R u t c`, `HasIncidenceIdentity R u t`: the `𝓘_t`-identities of eq. (1.3);
-* `IsSeparator K u t P`, `HasSeparator K u t`: polynomial separators of degree `t`;
+* `IsSeparator K u t P`, `HasSeparator K u t`: polynomial separators of degree at most `t`;
 * `IsShortZeroFree u`: no zero set of size at most `exp(G)`.
 
 It also contains the reindexing lemmas used throughout (`hasIncidenceIdentity_comp_equiv`,
@@ -52,13 +52,13 @@ def IsIncidenceIdentity (R : Type*) [CommRing R] [Fintype ι] (u : ι → G) (t 
 def HasIncidenceIdentity (R : Type*) [CommRing R] [Fintype ι] (u : ι → G) (t : ℕ) : Prop :=
   ∃ c : Finset ι → R, IsIncidenceIdentity R u t c
 
-/-- A *separator of degree `t`* over the field `K` for `u`: a polynomial of total degree at
+/-- A *separator of degree at most `t`* over the field `K` for `u`: a polynomial of total degree at
 most `t` with `P(0) = 1` and `P(𝟙_E) = 0` for every zero set `E`. -/
 def IsSeparator (K : Type*) [Field K] (u : ι → G) (t : ℕ) (P : MvPolynomial ι K) : Prop :=
   P.totalDegree ≤ t ∧ MvPolynomial.eval 0 P = 1 ∧
     ∀ E : Finset ι, IsZeroSet u E → MvPolynomial.eval ((E : Set ι).indicator 1) P = 0
 
-/-- `u` has a separator of degree `t` over `K`. -/
+/-- `u` has a separator of degree at most `t` over `K`. -/
 def HasSeparator (K : Type*) [Field K] (u : ι → G) (t : ℕ) : Prop :=
   ∃ P : MvPolynomial ι K, IsSeparator K u t P
 
