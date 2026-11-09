@@ -14,7 +14,7 @@ import Mathlib.LinearAlgebra.Dual.Lemmas
 # Lemma 2.1(3)
 
 `hasIncidenceIdentity_iff_not_hasSeparator`: over a field, a sequence has an `𝓘_t`-identity iff it
-has no separator of degree `t` (linear duality).
+has no separator of degree at most `t` (linear duality).
 
 The forward direction applies Lemma 2.1(1) to a separator. For the converse, an identity is
 a solution `c` of `∑_E c_E v_E = e` in `Finset ι → K`, where `v_E J = [E ∈ 𝒵(u), #J ≤ t, J ⊆ E]`
@@ -50,7 +50,7 @@ theorem eval_indicator_prod_X {K : Type*} [CommSemiring K] (E J : Finset ι)
 end Identities
 
 /-- **Lemma 2.1(3)**: over a field, `u` has an `𝓘_t`-identity iff it
-has no separator of degree `t`. -/
+has no separator of degree at most `t`. -/
 theorem hasIncidenceIdentity_iff_not_hasSeparator (K : Type*) [Field K] [Fintype ι]
     (u : ι → G) (t : ℕ) :
     HasIncidenceIdentity K u t ↔ ¬ HasSeparator K u t := by
