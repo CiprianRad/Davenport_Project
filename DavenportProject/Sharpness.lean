@@ -15,8 +15,8 @@ import Mathlib.LinearAlgebra.Vandermonde
 
 `le_kappa_cube`: for `m ≥ 2`, `t ≥ 0` and a field `K` whose characteristic is zero or does not
 divide `m`, `m(t + 3) - 2 ≤ κ_t(C_m^3; K)`. The sequence `e₁^{m-1} e₂^{m-1} e₃^{m(t+1)-1}` of
-length `m(t + 3) - 3` has a separator of degree `t`, built from elementary symmetric polynomials;
-its existence uses the binomial determinant `det (binom(mk, j)) = m^{t(t+1)/2}`.
+length `m(t + 3) - 3` has a separator of degree at most `t`, built from elementary symmetric
+polynomials; its existence uses the binomial determinant `det (binom(mk, j)) = m^{t(t+1)/2}`.
 -/
 public section
 
@@ -33,6 +33,8 @@ Proof: scaling column `j` by `j!` turns
 `binom(mk, j)` into the descending Pochhammer polynomial of degree `j` (monic) evaluated at
 `mk`, so the determinant becomes the Vandermonde determinant of `0, m, …, mt`, which is
 `m^{t(t+1)/2}` times the superfactorial `sf t = ∏_{j ≤ t} j!`.
+
+The paper computes the same determinant by an integer triangular factorization of the matrix.
 -/
 
 open Nat in
