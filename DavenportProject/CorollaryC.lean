@@ -18,8 +18,9 @@ import DavenportProject.Transfer.TheoremA
   `a ≤ b ≤ c`, `D(C_{mp^a} ⊕ C_{mp^b} ⊕ C_{mp^c}) = m(p^a + p^b + p^c) - 2`.
 * `davenport_cube_three_mul_prime_pow`, `davenport_cube_four_mul_prime_pow`: the cubes
   `C_{3p^a}^3` and `C_{4p^a}^3`.
-* The displayed values `D(C_15^3) = 43`, `D(C_20^3) = 58`, `D(C_21^3) = 61`, `D(C_28^3) = 82`,
-  `D(C_36^3) = 106`, `D(C_3 ⊕ C_15 ⊕ C_75) = 91` and `D(C_4 ⊕ C_20 ⊕ C_100) = 122`.
+* Numerical instances: `D(C_15^3) = 43`, `D(C_20^3) = 58`, `D(C_21^3) = 61`, `D(C_28^3) = 82`,
+  `D(C_36^3) = 106`, `D(C_3 ⊕ C_15 ⊕ C_75) = 91` and `D(C_4 ⊕ C_20 ⊕ C_100) = 122`. The paper
+  works out `D(C_15^3) = 43` (Introduction) and `D(C_3 ⊕ C_15 ⊕ C_75) = 91` (Section 6).
 
 The upper bound is Theorem A for integral identities applied to Theorem B (eq. (6.1)); the lower
 bound is the basis bound `D(G) ≥ D*(G)`.
@@ -226,7 +227,7 @@ Corollary C (`davenport_zmod_prod_three`):
   `D ≤ m(p^a + p^b + p^c) - 2`;
 * lower bound: `le_davenport_zmod_prod_three`.
 
-The cases `a = b = c` with `m = 3` and `m = 4` and the displayed values follow.
+The cases `a = b = c` with `m = 3` and `m = 4` and the numerical instances follow.
 -/
 
 /-- Eq. (6.1): for `m ∈ {2,3,4}`, every prime `p` and every finite abelian `p`-group `H`,
@@ -325,38 +326,38 @@ theorem davenport_cube_four_mul_prime_pow (p : ℕ) [Fact p.Prime] (hp : Odd p) 
     exact (Nat.not_even_iff_odd.2 hp) even_two
   rw [CorollaryC.davenport_cube_mul_prime_pow 4 (by norm_num) p hpm a]
 
-/-- Displayed value: `D(C_{15}^3) = 43`. -/
+/-- Numerical instance: `D(C_{15}^3) = 43`. -/
 theorem davenport_cube_fifteen : davenport (Fin 3 → ZMod 15) = 43 :=
   haveI : Fact (Nat.Prime 5) := ⟨Nat.prime_five⟩
   davenport_cube_three_mul_prime_pow 5 (by norm_num) 1
 
-/-- Displayed value: `D(C_{20}^3) = 58`. -/
+/-- Numerical instance: `D(C_{20}^3) = 58`. -/
 theorem davenport_cube_twenty : davenport (Fin 3 → ZMod 20) = 58 :=
   haveI : Fact (Nat.Prime 5) := ⟨Nat.prime_five⟩
   davenport_cube_four_mul_prime_pow 5 (by decide) 1
 
-/-- Displayed value: `D(C_{21}^3) = 61`. -/
+/-- Numerical instance: `D(C_{21}^3) = 61`. -/
 theorem davenport_cube_twentyOne : davenport (Fin 3 → ZMod 21) = 61 :=
   haveI : Fact (Nat.Prime 7) := ⟨by decide⟩
   davenport_cube_three_mul_prime_pow 7 (by norm_num) 1
 
-/-- Displayed value: `D(C_{28}^3) = 82`. -/
+/-- Numerical instance: `D(C_{28}^3) = 82`. -/
 theorem davenport_cube_twentyEight : davenport (Fin 3 → ZMod 28) = 82 :=
   haveI : Fact (Nat.Prime 7) := ⟨by decide⟩
   davenport_cube_four_mul_prime_pow 7 (by decide) 1
 
-/-- Displayed value: `D(C_{36}^3) = 106`. -/
+/-- Numerical instance: `D(C_{36}^3) = 106`. -/
 theorem davenport_cube_thirtySix : davenport (Fin 3 → ZMod 36) = 106 :=
   haveI : Fact (Nat.Prime 3) := ⟨Nat.prime_three⟩
   davenport_cube_four_mul_prime_pow 3 (by decide) 2
 
-/-- Displayed value: `D(C_3 ⊕ C_{15} ⊕ C_{75}) = 91`. -/
+/-- Numerical instance: `D(C_3 ⊕ C_{15} ⊕ C_{75}) = 91`. -/
 theorem davenport_zmod_three_fifteen_seventyFive :
     davenport (ZMod 3 × ZMod 15 × ZMod 75) = 91 :=
   haveI : Fact (Nat.Prime 5) := ⟨Nat.prime_five⟩
   davenport_zmod_prod_three 3 (by decide) 5 (by norm_num) 0 1 2 (by norm_num) (by norm_num)
 
-/-- Displayed value: `D(C_4 ⊕ C_{20} ⊕ C_{100}) = 122`. -/
+/-- Numerical instance: `D(C_4 ⊕ C_{20} ⊕ C_{100}) = 122`. -/
 theorem davenport_zmod_four_twenty_hundred :
     davenport (ZMod 4 × ZMod 20 × ZMod 100) = 122 :=
   haveI : Fact (Nat.Prime 5) := ⟨Nat.prime_five⟩
