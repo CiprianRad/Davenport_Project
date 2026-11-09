@@ -24,7 +24,9 @@ import Mathlib.GroupTheory.FiniteAbelian.Basic
   prime `p`.
 
 The proof uses Lemma 3.1, Olson's theorem, Lemma 2.1(3) and the structure theorem for finite
-abelian `p`-groups.
+abelian `p`-groups. The paper evaluates the identity at the indicator polynomial `P` of Lemma 3.1
+(through Lemma 2.1(1)); here the same step is phrased through Lemma 2.1(3): `P` would be a
+separator of degree at most `D(H) - 1` for the sequence over `Q`.
 -/
 
 public section
