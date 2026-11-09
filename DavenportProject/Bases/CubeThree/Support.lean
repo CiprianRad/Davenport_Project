@@ -21,6 +21,8 @@ import Mathlib.Tactic.IntervalCases
 `card_support_le_of_isShortZeroFree_cube_three`: the support of a short-zero-free sequence over
 `C_3^3` has at most eight points; seven-point supports have nonzero sum and eight-point supports
 sum to zero. The finite part is the kernel check of `Bases.CubeThree.SupportCheck`.
+The paper proves these three facts by counting affine planes through the cap `A ∪ {0}`; the formal
+proof checks them by enumeration instead.
 -/
 
 public section
@@ -209,7 +211,7 @@ zero and eight always do. Nine admissible points cannot exist: each eight-point 
 zero, so all nine points would equal the total sum.
 -/
 
-/-- **Lemma 5.1(2)** (finite computation): the support of a
+/-- **Lemma 5.1(2)** (by enumeration here; the paper has a proof by hand): the support of a
 short-zero-free sequence over `C_3^3` has at most eight points; every such support with seven
 points has nonzero sum, and every such support with eight points has sum zero. -/
 theorem card_support_le_of_isShortZeroFree_cube_three {N : ℕ} (u : Fin N → (Fin 3 → ZMod 3))
