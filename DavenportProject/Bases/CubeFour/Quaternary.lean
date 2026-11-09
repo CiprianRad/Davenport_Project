@@ -24,6 +24,9 @@ Short zero sets reduce to smaller cases through Lemma 2.2. Short-zero-free seque
 normalized (`exists_sortedCodes`) and covered by the enumeration (`leaf_of_prefixes`), whose leaves
 pass the certificate checks of `Bases.CubeFour.Checks`. The normalization differs from the paper's
 projection-and-lift; the orbit counts of the hard cases agree with the paper (6,963 and 64).
+
+The paper states Lemma 5.3 as one sentence; (1) and (2) are its fourteen-term and eighteen-term
+assertions. Its two enumerations are in Appendix A.2 and A.3, with the counts in Table 3.
 -/
 
 public section
