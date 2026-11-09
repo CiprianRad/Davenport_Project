@@ -17,8 +17,9 @@ import Mathlib.Logic.Equiv.Fin.Basic
 
 * `davenport G`: the least `N` such that every sequence of `N` terms has a zero set, defined from
   `exists_length_forcing_zeroSet` and characterized by `davenport_eq_iff`.
-* `kappa G K t`: the least `N` such that no sequence of `N` terms has a separator of degree `t`
-  over `K`, defined from `exists_length_without_separator` and characterized by `kappa_eq_iff`.
+* `kappa G K t`: the least `N` such that no sequence of `N` terms has a separator of degree at
+  most `t` over `K`, defined from `exists_length_without_separator` and characterized by
+  `kappa_eq_iff`.
 -/
 
 @[expose] public section
@@ -105,13 +106,13 @@ theorem exists_length_without_separator (G : Type*) [AddCommGroup G] [Finite G]
 
 open Classical in
 /-- `κ_t(G;K)`: the least `N` such that no sequence of `N` terms over `G` has a separator of
-degree `t` over `K`. -/
+degree at most `t` over `K`. -/
 noncomputable def kappa (G : Type*) [AddCommGroup G] [Finite G] (K : Type*) [Field K]
     (t : ℕ) : ℕ :=
   Nat.find (exists_length_without_separator G K t)
 
-/-- Characterization of `kappa`: no sequence of `L` terms has a separator of degree `t`, and `L`
-is the least such length. -/
+/-- Characterization of `kappa`: no sequence of `L` terms has a separator of degree at most `t`,
+and `L` is the least such length. -/
 theorem kappa_eq_iff (G : Type*) [AddCommGroup G] [Finite G] (K : Type*) [Field K]
     (t N : ℕ) :
     kappa G K t = N ↔
