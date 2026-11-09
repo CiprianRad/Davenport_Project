@@ -36,8 +36,8 @@ variable {G : Type*} [AddCommGroup G]
 
 /-- An integral `𝓘_t`-identity for every sequence of length `N` gives `κ_t(G; K) ≤ N` for every
 field `K`: the identity reduces to an identity over `K` (Lemma 2.1(2)), which rules out a separator
-of degree `t` (Lemma 2.1(3)), while `κ_t(G; K) > N` would give a sequence of length `N` with a
-separator. -/
+of degree at most `t` (Lemma 2.1(3)), while `κ_t(G; K) > N` would give a sequence of length `N`
+with a separator. -/
 theorem kappa_le_of_forall_hasIncidenceIdentity [Finite G] (K : Type*) [Field K]
     {t N : ℕ} (h : ∀ u : Fin N → G, HasIncidenceIdentity ℤ u t) :
     kappa G K t ≤ N := by
