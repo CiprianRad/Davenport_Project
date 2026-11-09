@@ -55,5 +55,5 @@ The last command should report both tables as identical. In `Data.lean` the line
 `data14.txt` and `data18.txt` are stored verbatim as Lean string literals, wrapped with string
 gaps and split into blocks of 100 lines.
 
-The unnormalized counts reproduce Table 2 of the paper: 24,445,377 fourteen-term and 1,267,272
+The unnormalized counts reproduce Table 3 of the paper: 24,445,377 fourteen-term and 1,267,272
 eighteen-term sequences with a fixed support basis.
