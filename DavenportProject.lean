@@ -10,6 +10,7 @@ public import DavenportProject.Identities.Evaluation
 public import DavenportProject.Identities.Duality
 public import DavenportProject.Identities.Operations
 public import DavenportProject.Invariants
+public import DavenportProject.InvariantBounds
 public import DavenportProject.Transfer.Augmentation
 public import DavenportProject.Transfer.Indicator
 public import DavenportProject.Transfer.Olson
