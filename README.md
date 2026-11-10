@@ -112,17 +112,20 @@ The numbers `a_{j,i}` in the proof of Proposition 4.1 are `Sharpness.blockSubset
 
 ### Section 5: the quotients C₂³, C₃³ and C₄³
 
+Apart from the last row, the files of this section are in
+[`DavenportProject/Bases/`](DavenportProject/Bases).
+
 | In the paper | In Lean | File |
 |---|---|---|
-| Theorem B for C₂³ (Section 5.1) | `Bases.hasIncidenceIdentity_cube_two` | [`Bases/CubeTwo.lean`](DavenportProject/Bases/CubeTwo.lean) |
-| Lemma 5.1(1) | `hasIncidenceIdentity_cube_three_ten` | [`Bases/CubeThree/Identity.lean`](DavenportProject/Bases/CubeThree/Identity.lean) |
-| Lemma 5.1(2) | `card_support_le_of_isShortZeroFree_cube_three` | [`Bases/CubeThree/Support.lean`](DavenportProject/Bases/CubeThree/Support.lean) |
-| Lemma 5.2 | `exists_large_zeroSet_cube_three` | [`Bases/CubeThree/LongZeroSet.lean`](DavenportProject/Bases/CubeThree/LongZeroSet.lean) |
-| Theorem B for C₃³ | `Bases.hasIncidenceIdentity_cube_three` | [`Bases/CubeThree.lean`](DavenportProject/Bases/CubeThree.lean) |
-| Lemma 5.3, fourteen terms | `hasIncidenceIdentity_cube_four_fourteen` | [`Bases/CubeFour/Quaternary.lean`](DavenportProject/Bases/CubeFour/Quaternary.lean) |
-| Lemma 5.3, eighteen terms | `hasIncidenceIdentity_cube_four_eighteen` | [`Bases/CubeFour/Quaternary.lean`](DavenportProject/Bases/CubeFour/Quaternary.lean) |
-| η(C₄³) ≤ 22 | `not_isShortZeroFree_cube_four` | [`Bases/CubeFour/Eta.lean`](DavenportProject/Bases/CubeFour/Eta.lean) |
-| Theorem B for C₄³ | `Bases.hasIncidenceIdentity_cube_four` | [`Bases/CubeFour.lean`](DavenportProject/Bases/CubeFour.lean) |
+| Theorem B, m = 2 | `Bases.hasIncidenceIdentity_cube_two` | [`CubeTwo.lean`](DavenportProject/Bases/CubeTwo.lean) |
+| Lemma 5.1(1) | `hasIncidenceIdentity_cube_three_ten` | [`CubeThree/Identity.lean`](DavenportProject/Bases/CubeThree/Identity.lean) |
+| Lemma 5.1(2) | `card_support_le_of_isShortZeroFree_cube_three` | [`CubeThree/Support.lean`](DavenportProject/Bases/CubeThree/Support.lean) |
+| Lemma 5.2 | `exists_large_zeroSet_cube_three` | [`CubeThree/LongZeroSet.lean`](DavenportProject/Bases/CubeThree/LongZeroSet.lean) |
+| Theorem B, m = 3 | `Bases.hasIncidenceIdentity_cube_three` | [`CubeThree.lean`](DavenportProject/Bases/CubeThree.lean) |
+| Lemma 5.3, 14 terms | `hasIncidenceIdentity_cube_four_fourteen` | [`CubeFour/Quaternary.lean`](DavenportProject/Bases/CubeFour/Quaternary.lean) |
+| Lemma 5.3, 18 terms | `hasIncidenceIdentity_cube_four_eighteen` | [`CubeFour/Quaternary.lean`](DavenportProject/Bases/CubeFour/Quaternary.lean) |
+| η(C₄³) ≤ 22 | `not_isShortZeroFree_cube_four` | [`CubeFour/Eta.lean`](DavenportProject/Bases/CubeFour/Eta.lean) |
+| Theorem B, m = 4 | `Bases.hasIncidenceIdentity_cube_four` | [`CubeFour.lean`](DavenportProject/Bases/CubeFour.lean) |
 | Theorem B | `hasIncidenceIdentity_cube`, `kappa_cube_le`, `kappa_cube_eq` | [`TheoremB.lean`](DavenportProject/TheoremB.lean) |
 
 The plane counting behind Lemma 5.1(2) is in
@@ -216,14 +219,14 @@ You need [Lean 4](https://lean-lang.org/install/) and, for the last step, Python
 
 ```sh
 lake exe cache get                     # download the compiled Mathlib
-lake build                             # compile everything, the thirteen native checks included
-python3 scripts/check_statements.py    # check the statements and their axioms
+lake build                             # compile everything
+python3 scripts/check_statements.py    # check statements and axioms
 ```
 
 The toolchain is `leanprover/lean4:v4.36.0-rc1` (see [`lean-toolchain`](lean-toolchain)), and
 Mathlib is pinned in [`lake-manifest.json`](lake-manifest.json). Once the Mathlib cache is in
-place, the build takes about two minutes on a laptop. The last command should end with
-`76 declarations, 0 failure(s)`.
+place, the build takes about two minutes on a laptop; the thirteen native checks are part of it.
+The last command should end with `76 declarations, 0 failure(s)`.
 
 The library `DavenportCompute`, which holds the computation of Lemma 5.3, does not depend on
 Mathlib and is compiled to native code. Lean's bundled C toolchain is enough for that.
