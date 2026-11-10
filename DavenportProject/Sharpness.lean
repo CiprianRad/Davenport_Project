@@ -8,7 +8,7 @@ module
 public import DavenportProject.Invariants
 public import Mathlib.Algebra.MvPolynomial.Monad
 public import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
-import Mathlib.LinearAlgebra.Vandermonde
+import DavenportProject.Sharpness.BlockCount
 
 /-!
 # Proposition 4.1: sharpness
@@ -27,65 +27,70 @@ open Finset MvPolynomial Matrix
 namespace Sharpness
 
 /-!
-## The binomial determinant `det (binom(mk, j)) = m^{t(t+1)/2}`
+## Proposition 4.1, Section 4: the integral binomial determinant
 
-Proof: scaling column `j` by `j!` turns
-`binom(mk, j)` into the descending Pochhammer polynomial of degree `j` (monic) evaluated at
-`mk`, so the determinant becomes the Vandermonde determinant of `0, m, …, mt`, which is
-`m^{t(t+1)/2}` times the superfactorial `sf t = ∏_{j ≤ t} j!`.
-
-The paper computes the same determinant by an integer triangular factorization of the matrix.
+A `j`-subset first chooses the `i` blocks it meets. The combinatorial double
+count in `choose_mul_eq_sum_blockSubsetCount` therefore gives `B = S * T`,
+where `S k i = binom(k,i)` and `T i j = a_{j,i}`. The first matrix is lower
+unitriangular and the second is upper triangular, with diagonal `m^j`.
+This computes the determinant over the integers, without division.
 -/
 
-open Nat in
-/-- `∏_{j ≤ t} j! = sf t`. -/
-private theorem prod_factorial_fin_eq_superFactorial (t : ℕ) :
-    ∏ j : Fin (t + 1), ((j : ℕ)! : ℤ) = (t.superFactorial : ℤ) := by
-  induction t with
-  | zero => simp
-  | succ t ih =>
-    rw [Fin.prod_univ_castSucc]
-    simp only [Fin.val_castSucc, Fin.val_last]
-    rw [ih, Nat.superFactorial_succ]
-    push_cast
-    ring
-
-open Nat in
-/-- `det (binom(mk, j))_{0 ≤ k, j ≤ t} = m^{t(t+1)/2}` over `ℤ`. -/
+/-- **Proposition 4.1, Section 4, determinant step.** The binomial-value matrix
+has determinant `m^{t(t+1)/2}`, by the paper's integral triangular factorization. -/
 theorem det_choose_mul (m t : ℕ) :
     (Matrix.of fun k j : Fin (t + 1) => ((Nat.choose (m * (k : ℕ)) (j : ℕ) : ℕ) : ℤ)).det =
       (m : ℤ) ^ (t * (t + 1) / 2) := by
-  set B := Matrix.of fun k j : Fin (t + 1) => ((Nat.choose (m * (k : ℕ)) (j : ℕ) : ℕ) : ℤ)
-  have hA : Matrix.of (fun k j : Fin (t + 1) =>
-      (descPochhammer ℤ (j : ℕ)).eval ((m * (k : ℕ) : ℕ) : ℤ)) =
-      B * Matrix.diagonal (fun j : Fin (t + 1) => (((j : ℕ)! : ℕ) : ℤ)) := by
+  classical
+  let B : Matrix (Fin (t + 1)) (Fin (t + 1)) ℤ :=
+    fun k j => ((m * (k : ℕ)).choose (j : ℕ) : ℤ)
+  let S : Matrix (Fin (t + 1)) (Fin (t + 1)) ℤ :=
+    fun k i => ((k : ℕ).choose (i : ℕ) : ℤ)
+  let T : Matrix (Fin (t + 1)) (Fin (t + 1)) ℤ :=
+    fun i j => (blockSubsetCount m (j : ℕ) (i : ℕ) : ℤ)
+  -- A subset chooses its met blocks first: the double count is exactly `B = S T`.
+  have hfactor : B = S * T := by
     ext k j
-    rw [Matrix.of_apply, Matrix.mul_diagonal, descPochhammer_eval_eq_descFactorial,
-      Nat.descFactorial_eq_factorial_mul_choose]
-    simp only [B, Matrix.of_apply]
-    push_cast
-    ring
-  have hV := det_eval_matrixOfPolynomials_eq_det_vandermonde
-    (fun k : Fin (t + 1) => ((m * (k : ℕ) : ℕ) : ℤ)) (fun j => descPochhammer ℤ (j : ℕ))
-    (fun j => descPochhammer_natDegree ℤ _) (fun j => monic_descPochhammer ℤ _)
-  rw [hA, det_mul, det_diagonal] at hV
-  have hW : vandermonde (fun k : Fin (t + 1) => ((m * (k : ℕ) : ℕ) : ℤ)) =
-      vandermonde (fun k : Fin (t + 1) => ((k : ℕ) : ℤ)) *
-        Matrix.diagonal (fun j : Fin (t + 1) => (m : ℤ) ^ (j : ℕ)) := by
-    ext k j
-    rw [Matrix.mul_diagonal, vandermonde_apply, vandermonde_apply]
-    push_cast
-    ring
-  rw [hW, det_mul, det_diagonal, det_vandermonde_id_eq_superFactorial,
-    Finset.prod_pow_eq_pow_sum] at hV
-  have hsum : ∑ j : Fin (t + 1), (j : ℕ) = t * (t + 1) / 2 := by
-    rw [Fin.sum_univ_eq_sum_range (fun j => j) (t + 1), Finset.sum_range_id, mul_comm]
-    rfl
-  have hprod := prod_factorial_fin_eq_superFactorial t
-  rw [← hprod, hsum] at hV
-  have hsf : ∏ j : Fin (t + 1), (((j : ℕ)! : ℕ) : ℤ) ≠ 0 :=
-    Finset.prod_ne_zero_iff.mpr fun j _ => by exact_mod_cast Nat.factorial_ne_zero _
-  exact mul_right_cancel₀ hsf (by rw [← hV]; ring)
+    have hext :
+        ∑ i ∈ range ((k : ℕ) + 1), (k : ℕ).choose i * blockSubsetCount m (j : ℕ) i =
+          ∑ i ∈ range (t + 1), (k : ℕ).choose i * blockSubsetCount m (j : ℕ) i := by
+      apply sum_subset (range_mono (by omega))
+      intro i _ hi
+      rw [Nat.choose_eq_zero_of_lt (by simp only [mem_range] at hi; omega)]
+      simp
+    have hnat : (m * (k : ℕ)).choose (j : ℕ) =
+        ∑ i : Fin (t + 1), (k : ℕ).choose (i : ℕ) *
+          blockSubsetCount m (j : ℕ) (i : ℕ) := by
+      rw [Fin.sum_univ_eq_sum_range (fun i => (k : ℕ).choose i *
+        blockSubsetCount m (j : ℕ) i) (t + 1)]
+      exact (choose_mul_eq_sum_blockSubsetCount m k j).trans hext
+    change ((m * (k : ℕ)).choose (j : ℕ) : ℤ) =
+      ∑ i : Fin (t + 1), ((k : ℕ).choose (i : ℕ) : ℤ) *
+        (blockSubsetCount m (j : ℕ) (i : ℕ) : ℤ)
+    exact_mod_cast hnat
+  -- `S` is lower unitriangular, since one cannot choose more than `k` blocks.
+  have hS : S.IsLowerTriangular := by
+    intro k i hki
+    change ((k : ℕ).choose (i : ℕ) : ℤ) = 0
+    exact_mod_cast Nat.choose_eq_zero_of_lt (show (k : ℕ) < (i : ℕ) from hki)
+  have hdetS : S.det = 1 := by
+    rw [det_of_isLowerTriangular S hS]
+    simp [S]
+  -- `T` is upper triangular: meeting `i` blocks requires at least `i` points.
+  have hT : T.IsUpperTriangular := by
+    intro i j hji
+    change (blockSubsetCount m (j : ℕ) (i : ℕ) : ℤ) = 0
+    exact_mod_cast blockSubsetCount_eq_zero_of_lt (m := m)
+      (show (j : ℕ) < (i : ℕ) from hji)
+  have hdetT : T.det = ∏ j : Fin (t + 1), (m : ℤ) ^ (j : ℕ) := by
+    rw [det_of_isUpperTriangular hT]
+    simp [T, blockSubsetCount_diag]
+  -- On the diagonal one chooses exactly one point from each block.
+  change B.det = _
+  rw [hfactor, det_mul, hdetS, one_mul, hdetT, prod_pow_eq_pow_sum]
+  congr 1
+  rw [Fin.sum_univ_eq_sum_range (fun j => j) (t + 1), sum_range_id, mul_comm]
+  rfl
 
 /-!
 ## Elementary symmetric polynomials in a block of variables
@@ -331,13 +336,15 @@ theorem natCast_ne_zero_of_ringChar (m : ℕ) [NeZero m] (K : Type*) [Field K]
     exact NeZero.ne m hdvd
   · exact h0 hdvd
 
-/-- The sequence `e₁^{m-1} e₂^{m-1} e₃^{m(t+1)-1}` of length `m(t+3) - 3`
-has a separator of degree `t` over `K` whenever `m ≠ 0` in `K`. -/
+/-- **Proposition 4.1, Section 4, separator step.** The sequence
+`e₁^{m-1} e₂^{m-1} e₃^{m(t+1)-1}` of length `m(t+3) - 3` has a separator of degree `t`
+over `K` whenever `m ≠ 0` in `K`. -/
 theorem hasSeparator_cubeSeq (m : ℕ) (hm : 1 ≤ m) (t : ℕ) (K : Type*) [Field K]
     (hmK : (m : K) ≠ 0) {n : ℕ} (hn : n = 2 * (m - 1) + (m * (t + 1) - 1)) :
     HasSeparator K (cubeSeq m n) t := by
   set BK : Matrix (Fin (t + 1)) (Fin (t + 1)) K :=
     Matrix.of fun k j => ((Nat.choose (m * (k : ℕ)) (j : ℕ) : ℕ) : K) with hBK
+  -- The integer determinant has nonzero image under the characteristic hypothesis.
   have hdet : BK.det ≠ 0 := by
     have h := congrArg (Int.castRingHom K) (det_choose_mul m t)
     rw [RingHom.map_det] at h
@@ -349,10 +356,12 @@ theorem hasSeparator_cubeSeq (m : ℕ) (hm : 1 ≤ m) (t : ℕ) (K : Type*) [Fie
     rw [hmap, map_pow, eq_intCast, Int.cast_natCast] at h
     rw [h]
     exact pow_ne_zero _ hmK
+  -- Choose the linear combination with values `1, 0, …, 0` at sizes `0, m, …, tm`.
   set c : Fin (t + 1) → K := BK⁻¹ *ᵥ Pi.single 0 1 with hc_def
   have hc : BK *ᵥ c = Pi.single 0 1 := by
     rw [hc_def, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ (isUnit_iff_ne_zero.mpr hdet),
       Matrix.one_mulVec]
+  -- The paper's separator is this combination of elementary symmetric polynomials.
   set T := thirdAxis m n
   set P : MvPolynomial (Fin n) K := ∑ j : Fin (t + 1), C (c j) * esymmOn K T j with hP
   have key : ∀ E : Finset (Fin n), E ⊆ T → ∀ k : Fin (t + 1), E.card = m * k →
@@ -391,16 +400,18 @@ determinant `det_choose_mul`). Since separators pass to shorter sequences
 -/
 
 open Sharpness in
-/-- **Proposition 4.1**: for `m ≥ 2`, `t ≥ 0` and a field `K` of
+/-- **Proposition 4.1, Section 4**: for `m ≥ 2`, `t ≥ 0` and a field `K` of
 characteristic zero or of characteristic not dividing `m`, `κ_t(C_m^3;K) ≥ m(t+3) - 2`. -/
 theorem le_kappa_cube (m : ℕ) [NeZero m] (hm : 2 ≤ m) (t : ℕ) (K : Type*) [Field K]
     (hK : ringChar K = 0 ∨ ¬ ringChar K ∣ m) :
     m * (t + 3) - 2 ≤ kappa (Fin 3 → ZMod m) K t := by
+  -- The displayed axis sequence has exactly one less than the claimed threshold.
   have hn : m * (t + 3) - 3 = 2 * (m - 1) + (m * (t + 1) - 1) := by
     rw [Nat.mul_add, Nat.mul_add]
     omega
   have hsep : ∃ u : Fin (m * (t + 3) - 3) → (Fin 3 → ZMod m), HasSeparator K u t :=
     ⟨_, hasSeparator_cubeSeq m (by omega) t K (natCast_ne_zero_of_ringChar m K hK) hn⟩
+  -- Its separator excludes this length and every shorter length from the threshold.
   by_contra hlt
   have hk := ((kappa_eq_iff (Fin 3 → ZMod m) K t _).mp rfl).1
   obtain ⟨u, hu⟩ := exists_hasSeparator_of_le K (N' := kappa (Fin 3 → ZMod m) K t) (by omega) hsep
