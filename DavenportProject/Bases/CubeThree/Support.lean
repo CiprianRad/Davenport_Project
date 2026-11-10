@@ -7,6 +7,7 @@ module
 
 public import DavenportProject.Bases.CubeThree.Masks
 public import DavenportProject.Bases.CubeThree.SupportCheck
+public import DavenportProject.Bases.CubeThree.Planes
 public import DavenportProject.Defs
 public import Mathlib.Algebra.BigOperators.Fin
 public import Mathlib.Data.Finset.Sort
@@ -20,9 +21,10 @@ import Mathlib.Tactic.IntervalCases
 
 `card_support_le_of_isShortZeroFree_cube_three`: the support of a short-zero-free sequence over
 `C_3^3` has at most eight points; seven-point supports have nonzero sum and eight-point supports
-sum to zero. The finite part is the kernel check of `Bases.CubeThree.SupportCheck`.
-The paper proves these three facts by counting affine planes through the cap `A ∪ {0}`; the formal
-proof checks them by enumeration instead.
+sum to zero. The proof follows the affine-plane incidence argument of Section 5.2, implemented
+in `Bases.CubeThree.Planes`. The original kernel enumeration in `SupportCheck` is retained below
+as the separately named `card_support_le_of_isShortZeroFree_cube_three_by_enumeration`, a redundant
+cross-check; the paper-facing theorem and its downstream deductions use plane counting.
 -/
 
 public section
@@ -211,10 +213,11 @@ zero and eight always do. Nine admissible points cannot exist: each eight-point 
 zero, so all nine points would equal the total sum.
 -/
 
-/-- **Lemma 5.1(2)** (by enumeration here; the paper has a proof by hand): the support of a
+/-- **Redundant enumeration cross-check of Lemma 5.1(2)**: the support of a
 short-zero-free sequence over `C_3^3` has at most eight points; every such support with seven
 points has nonzero sum, and every such support with eight points has sum zero. -/
-theorem card_support_le_of_isShortZeroFree_cube_three {N : ℕ} (u : Fin N → (Fin 3 → ZMod 3))
+theorem card_support_le_of_isShortZeroFree_cube_three_by_enumeration {N : ℕ}
+    (u : Fin N → (Fin 3 → ZMod 3))
     (hu : IsShortZeroFree u) :
     #(univ.image u) ≤ 8 ∧
       (#(univ.image u) = 7 → ∑ x ∈ univ.image u, x ≠ 0) ∧
@@ -262,5 +265,45 @@ theorem card_support_le_of_isShortZeroFree_cube_three {N : ℕ} (u : Fin N → (
   refine ⟨hcard ▸ card_le_eight hB h0 h2 h3, fun h7 => ?_, fun h8 => ?_⟩
   · rw [hsum]; exact sum_dec_ne_zero hB h0 h2 h3 (hcard.trans h7)
   · rw [hsum]; exact sum_dec_eq_zero hB h0 h2 h3 (hcard.trans h8)
+
+/-- **Lemma 5.1(2), Section 5.2**: the support of a short-zero-free sequence over `C₃³` has at
+most eight points; seven-point supports have nonzero sum and eight-point supports sum to zero.
+Adjoin zero to the support and apply the paper's affine-plane counting proof. -/
+theorem card_support_le_of_isShortZeroFree_cube_three {N : ℕ} (u : Fin N → (Fin 3 → ZMod 3))
+    (hu : IsShortZeroFree u) :
+    #(univ.image u) ≤ 8 ∧
+      (#(univ.image u) = 7 → ∑ x ∈ univ.image u, x ≠ 0) ∧
+      (#(univ.image u) = 8 → ∑ x ∈ univ.image u, x = 0) := by
+  classical
+  let A := univ.image u
+  -- The first paragraph of the paper: short zero sets exclude zero, opposite pairs, and triples.
+  have hsmall : ∀ E : Finset (Fin N), E.Nonempty → #E ≤ 3 → ∑ i ∈ E, u i ≠ 0 :=
+    fun E hE hc hs => absurd (hu E ⟨hE,hs⟩) (by have := three_le_exponent; omega)
+  have hA : ∀ x ∈ A, ∃ i, u i = x := fun x hx => by simpa [A] using hx
+  have h0 : (0 : Fin 3 → ZMod 3) ∉ A := by
+    intro h
+    obtain ⟨i,hi⟩ := hA 0 h
+    exact hsmall {i} (singleton_nonempty i) (by simp) (by simpa using hi)
+  have h2 : ∀ x ∈ A, ∀ y ∈ A, x ≠ y → x + y ≠ 0 := by
+    intro x hx y hy hxy hsum
+    obtain ⟨i,rfl⟩ := hA x hx
+    obtain ⟨j,rfl⟩ := hA y hy
+    have hij : i ≠ j := fun h => hxy (by rw [h])
+    exact hsmall {i,j} (insert_nonempty i _) (card_le_two.trans (by norm_num))
+      (by rwa [sum_pair hij])
+  have h3 : ∀ x ∈ A, ∀ y ∈ A, ∀ z ∈ A,
+      x ≠ y → x ≠ z → y ≠ z → x + y + z ≠ 0 := by
+    intro x hx y hy z hz hxy hxz hyz hsum
+    obtain ⟨i,rfl⟩ := hA x hx
+    obtain ⟨j,rfl⟩ := hA y hy
+    obtain ⟨k,rfl⟩ := hA z hz
+    have hij : i ≠ j := fun h => hxy (by rw [h])
+    have hik : i ≠ k := fun h => hxz (by rw [h])
+    have hjk : j ≠ k := fun h => hyz (by rw [h])
+    exact hsmall {i,j,k} (insert_nonempty i _) card_le_three
+      (by rwa [sum_insert (by simp [hij,hik]),sum_pair hjk,← add_assoc])
+  -- The remaining paragraphs: the plane cap bound, four incidence equations,
+  -- and the two slice arguments.
+  exact CubeThree.Planes.support_spec h0 h2 h3
 
 end DavenportProject
