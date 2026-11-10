@@ -39,3 +39,4 @@ public import DavenportProject.Bases.CubeFour.Quaternary
 public import DavenportProject.Bases.CubeFour
 public import DavenportProject.TheoremB
 public import DavenportProject.CorollaryC
+public import DavenportProject.Examples.QuaternaryEighteen
