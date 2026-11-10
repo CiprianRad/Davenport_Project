@@ -6,6 +6,7 @@ Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 module
 
 public import DavenportProject.Defs
+import DavenportProject.Identities.PolynomialLifting
 import Mathlib.Data.Nat.Choose.Sum
 import Mathlib.Tactic.LinearCombination
 
@@ -241,7 +242,8 @@ theorem hasIncidenceIdentity_of_pairwise_disjoint [Fintype ι] (u : ι → G) (t
 
 /-! ## Proof of Lemma 2.2(2) -/
 
-/-- **Lemma 2.2(2)**: for `t ≥ 1`, a zero set `B` together with an
+/-- **Lemma 2.2(2), Section 2** (finite-difference construction): for `t ≥ 1`, a zero set `B`
+together with an
 integral `𝓘_{t-1}`-identity on a subsequence disjoint from `B` gives an integral
 `𝓘_t`-identity. -/
 theorem hasIncidenceIdentity_of_disjoint_zeroSet [Fintype ι] (u : ι → G) {t : ℕ}
@@ -249,7 +251,7 @@ theorem hasIncidenceIdentity_of_disjoint_zeroSet [Fintype ι] (u : ι → G) {t 
     (hS : HasIncidenceIdentity ℤ (fun i : S => u i) (t - 1)) :
     HasIncidenceIdentity ℤ u t := by
   classical
-  obtain ⟨c, hc1, hcJ⟩ := hS
+  obtain ⟨c, hc⟩ := hS
   set Z' := zeroSets (fun i : S => u i)
   have hlift : ∀ E ∈ Z', liftSub S E ∈ zeroSets u := fun E hE =>
     mem_zeroSets.2 <| (isZeroSet_liftSub_iff u S E).2 (mem_zeroSets.1 hE)
@@ -266,79 +268,29 @@ theorem hasIncidenceIdentity_of_disjoint_zeroSet [Fintype ι] (u : ι → G) {t 
     simp_rw [ite_mul, one_mul, zero_mul]
     rw [sum_ite_eq]
     simp [mem_zeroSets.2 hB]
-  refine ⟨c', ?_, fun J hJ1 hJt => ?_⟩
-  · have := key (fun _ => 1)
-    simp only [mul_one] at this
-    rw [this]
-    simp
-  · have hJne : J.Nonempty := card_pos.1 hJ1
-    have hm := key (fun F => if J ⊆ F then 1 else 0)
-    simp only [mul_ite, mul_one, mul_zero] at hm
-    rw [sum_filter, hm]
-    by_cases hJS : J ⊆ S
-    · have hJB : ¬ J ⊆ B := by
-        obtain ⟨x, hx⟩ := hJne
-        exact fun h => disjoint_left.1 hSB (hJS hx) (h hx)
-      have hiff : ∀ E : Finset S, J ⊆ liftSub S E ∪ B ↔ J ⊆ liftSub S E := by
-        intro E
-        refine ⟨fun h x hx => ?_, fun h => h.trans subset_union_left⟩
-        rcases mem_union.1 (h hx) with h' | h'
-        · exact h'
-        · exact absurd h' (disjoint_left.1 hSB (hJS hx))
-      simp only [hiff, hJB, ite_false]
-      simp
-    · have h1 : ∀ E : Finset S, ¬ J ⊆ liftSub S E := fun E h =>
-        hJS (h.trans (liftSub_subset S E))
-      simp only [h1, ite_false, sum_const_zero, zero_sub]
-      by_cases hJSB : J ⊆ S ∪ B
-      · set J₁ : Finset S := J.subtype (· ∈ S) with hJ₁
-        have hiff : ∀ E : Finset S, J ⊆ liftSub S E ∪ B ↔ J₁ ⊆ E := by
-          intro E
-          constructor
-          · intro h y hy
-            rw [hJ₁, mem_subtype] at hy
-            rcases mem_union.1 (h hy) with h' | h'
-            · obtain ⟨_, h''⟩ := mem_liftSub.1 h'
-              exact h''
-            · exact absurd h' (disjoint_left.1 hSB y.2)
-          · intro h x hx
-            rcases mem_union.1 (hJSB hx) with hxS | hxB
-            · refine mem_union_left _ (mem_liftSub.2 ⟨hxS, h ?_⟩)
-              rw [hJ₁, mem_subtype]
-              exact hx
-            · exact mem_union_right _ hxB
-        simp only [hiff]
-        rw [← sum_filter]
-        have hcard : #J₁ ≤ t - 1 := by
-          have hlt : #(J.filter (· ∈ S)) < #J := by
-            refine card_lt_card (filter_ssubset.2 ?_)
-            obtain ⟨x, hx, hxS⟩ := not_subset.1 hJS
-            exact ⟨x, hx, hxS⟩
-          rw [hJ₁, card_subtype]
-          omega
-        by_cases hJ₁e : J₁ = ∅
-        · have hJB : J ⊆ B := by
-            intro x hx
-            rcases mem_union.1 (hJSB hx) with hxS | hxB
-            · have : (⟨x, hxS⟩ : S) ∈ J₁ := by rw [hJ₁, mem_subtype]; exact hx
-              rw [hJ₁e] at this
-              exact absurd this (notMem_empty _)
-            · exact hxB
-          rw [hJ₁e, filter_true_of_mem (fun _ _ => empty_subset _), hc1]
-          simp [hJB]
-        · have hJ₁1 : 1 ≤ #J₁ := card_pos.2 (nonempty_iff_ne_empty.2 hJ₁e)
-          have hJB : ¬ J ⊆ B := by
-            obtain ⟨y, hy⟩ := nonempty_iff_ne_empty.2 hJ₁e
-            rw [hJ₁, mem_subtype] at hy
-            exact fun h => disjoint_left.1 hSB y.2 (h hy)
-          have h0 : ∑ a ∈ Z' with J₁ ⊆ a, c a = 0 := by convert hcJ J₁ hJ₁1 hcard
-          rw [h0]
-          simp [hJB]
-      · have h2 : ∀ E : Finset S, ¬ J ⊆ liftSub S E ∪ B := fun E h =>
-          hJSB (h.trans (union_subset_union (liftSub_subset S E) subset_rfl))
-        have h3 : ¬ J ⊆ B := fun h => hJSB (h.trans subset_union_right)
-        simp only [h2, h3, ite_false, sum_const_zero]
-        simp
+  -- Lemma 2.1(1): it suffices to reproduce evaluation of every polynomial at zero.
+  refine ⟨c', (isIncidenceIdentity_iff_eval u t c').2 ?_⟩
+  intro P hP
+  -- Section 2: multilinearise P on Boolean inputs, then restrict
+  -- P(z + 1_B) - P(z) to the coordinates of the old subsequence S.
+  -- Terms not meeting B cancel; each surviving term has lost at least one degree.
+  have hDlt : (PolynomialLifting.finiteDifference P S B).totalDegree < t :=
+    (PolynomialLifting.degree_finiteDifference P S B hP).trans_lt
+      (Nat.sub_lt ht (by decide))
+  have hD := (isIncidenceIdentity_iff_eval (fun i : S => u i) (t - 1) c).1 hc
+    (PolynomialLifting.finiteDifference P S B)
+    (Nat.le_sub_one_of_lt hDlt)
+  have hD0 : MvPolynomial.eval 0 (PolynomialLifting.finiteDifference P S B) =
+      MvPolynomial.eval ((B : Set ι).indicator 1) P - MvPolynomial.eval 0 P := by
+    simpa using PolynomialLifting.eval_finiteDifference P S B hSB ∅
+  -- Apply the old identity to this lower-degree polynomial and rearrange.
+  simp_rw [PolynomialLifting.eval_finiteDifference P S B hSB, mul_sub] at hD
+  rw [sum_sub_distrib, hD0] at hD
+  rw [key]
+  change (∑ E ∈ Z', c E * MvPolynomial.eval ((liftSub S E : Set ι).indicator 1) P) -
+      (∑ E ∈ Z', c E * MvPolynomial.eval (((liftSub S E ∪ B : Finset ι) : Set ι).indicator 1) P) +
+      MvPolynomial.eval ((B : Set ι).indicator 1) P = MvPolynomial.eval 0 P
+  linear_combination -hD
 
 /-!
 ## Proof of Lemma 2.2(3)
