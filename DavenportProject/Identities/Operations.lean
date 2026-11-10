@@ -112,8 +112,8 @@ open Identities
 ## Proof of Lemma 2.2(1)
 
 The identity is the inclusion–exclusion one: for every nonempty `S ⊆ Fin (t + 1)` the union
-`⋃_{k ∈ S} B k` is a zero set, and it receives the weight `(-1) ^ (#S + 1)`. The implementation sums weights over union fibers; disjoint
-nonempty blocks make these unions distinct.
+`⋃_{k ∈ S} B k` is a zero set, and it receives the weight `(-1) ^ (#S + 1)`. The implementation
+sums weights over union fibers; disjoint nonempty blocks make these unions distinct.
 -/
 
 /-- **Lemma 2.2(1), Section 2**: `t + 1` pairwise disjoint zero sets give an

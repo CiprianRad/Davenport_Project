@@ -1,5 +1,5 @@
 {
-  "description": "The formalized statements of Pop, Rad and Țurcaș, \"Integral zero-sum incidence identities and Davenport constants in rank three\". `sha256` is the hash of the whitespace-normalized `pp.all` elaboration of each declaration (`#check @name` for theorems, `#print name` for definitions), computed from the statements approved by the authors. Checked by scripts/check_statements.py.",
+  "description": "The formalized statements of Pop, Rad and Țurcaș, \"Integral zero-sum incidence identities and Davenport constants in rank three\". The original 43 declaration entries retain their author-approved hashes. Additional paper-v4 declarations were recorded during the proof-alignment run. `sha256` hashes the whitespace-normalized `pp.all` elaboration (`#check @name` for theorems, `#print name` for definitions). Checked by scripts/check_statements.py.",
   "module": "DavenportProject",
   "native_checks": [
     "DavenportProject.CubeFour.Checks.top",
@@ -317,6 +317,237 @@
       "paper": "Corollary C: D(C_4⊕C_20⊕C_100) = 122",
       "native": true,
       "sha256": "37a18ea57007107b2e1ab7537beb1fd2727c37a8a35669cc5c68f108840fcaec"
+    },
+    {
+      "name": "DavenportProject.kappa_zero_eq_davenport",
+      "kind": "theorem",
+      "paper": "Section 1: κ₀(G;K) = D(G)",
+      "native": false,
+      "sha256": "540842db61e92081dcb5f4f9bdb88515dd3f4f0526195c6c0d58d6306fa613e4"
+    },
+    {
+      "name": "DavenportProject.hasIncidenceIdentity_mul_davenport",
+      "kind": "theorem",
+      "paper": "Section 2: disjoint D(G)-blocks",
+      "native": false,
+      "sha256": "b2df3d34888da07f8c583a055b7d219e1f4331906376e13d6360ec54588fab6f"
+    },
+    {
+      "name": "DavenportProject.kappa_le_mul_davenport",
+      "kind": "theorem",
+      "paper": "Section 2: κ_t ≤ (t+1)D(G)",
+      "native": false,
+      "sha256": "65f59a62e071f3f8dc989e2aa274afb6435c6c27b7152027b942f26241c24738"
+    },
+    {
+      "name": "DavenportProject.HasIncidenceIdentity.of_embedding",
+      "kind": "theorem",
+      "paper": "Section 2: subsequence extension",
+      "native": false,
+      "sha256": "31cff6300cf4bc0edf7240f71667cff706a6312da474077943f49de5a0427699"
+    },
+    {
+      "name": "DavenportProject.kappa_cube_two_zmod_two_one",
+      "kind": "theorem",
+      "paper": "Remark 4.2: κ₁(C₂³;F₂) = 5",
+      "native": false,
+      "sha256": "94b0809751b681cfef7186ef4e49daa7e0596f5d1a48a8443011fb221a046227"
+    },
+    {
+      "name": "DavenportProject.eta",
+      "kind": "definition",
+      "paper": "Remark 3.2: definition of η",
+      "native": false,
+      "sha256": "bed8f2d71dd5c99858bf9ea0d523e0a4532bb1575b47b6f07f0d8a1f813fb349"
+    },
+    {
+      "name": "DavenportProject.eta_eq_iff",
+      "kind": "theorem",
+      "paper": "Remark 3.2: characterization of η",
+      "native": false,
+      "sha256": "379228f5de645fd828b50ff60485e49fc068c3fe59b69e8839075915530482a7"
+    },
+    {
+      "name": "DavenportProject.Transfer.exists_disjoint_shortZeroSets",
+      "kind": "theorem",
+      "paper": "Remark 3.2: short block extraction",
+      "native": false,
+      "sha256": "a16231c7c14d16d4700acec922c0b1d4fb5b10822ce1cf4144f2354c60a0ae44"
+    },
+    {
+      "name": "DavenportProject.hasIncidenceIdentity_eta_add_mul_exponent",
+      "kind": "theorem",
+      "paper": "Remark 3.2: block identity",
+      "native": false,
+      "sha256": "248fa706066a73fa765d5e4b30dee7d565cf700ac97e1d2e05035fa645566b7a"
+    },
+    {
+      "name": "DavenportProject.davenport_prod_le_eta_add_mul_exponent",
+      "kind": "theorem",
+      "paper": "Remark 3.2: classical block bound",
+      "native": false,
+      "sha256": "f7d114492224827c79e42228da3e66b59f8f029d7fa5ba763abe1629a2284208"
+    },
+    {
+      "name": "DavenportProject.card_support_le_of_isShortZeroFree_cube_three_by_enumeration",
+      "kind": "theorem",
+      "paper": "Appendix A.1: redundant cross-check",
+      "native": false,
+      "sha256": "47ceee15a28536f6c4aabc08184664fb5609270e1e001aa029a5f87a82340be7"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.codes",
+      "kind": "definition",
+      "paper": "Section 5.3 example: codes",
+      "native": false,
+      "sha256": "679c432229f154167b8f3ad57de4910b2b0652aadd2ec9e05859153e0a08a330"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.sequence",
+      "kind": "definition",
+      "paper": "Section 5.3 example: sequence",
+      "native": false,
+      "sha256": "435daf0750f6776c2790c240e94058fbda5ae29bcbd4610fd9969faad8b91314"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.B",
+      "kind": "definition",
+      "paper": "Section 5.3 example: B",
+      "native": false,
+      "sha256": "5db8a5d10e8da3180282ffd16d3bd80c895e42368dd0886e17eed45108493c68"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.A",
+      "kind": "definition",
+      "paper": "Section 5.3 example: A",
+      "native": false,
+      "sha256": "4f939f1d15fed593495c6bfd60e8c95c05200b8801a3239daa947cce12ee1df7"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.C",
+      "kind": "definition",
+      "paper": "Section 5.3 example: C",
+      "native": false,
+      "sha256": "178fd1f8e21cfd978d575bc105b68d1c48501e0a30b4533a8cc4030112f68c5c"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.D",
+      "kind": "definition",
+      "paper": "Section 5.3 example: D",
+      "native": false,
+      "sha256": "8ac58f3ee0afbeb947eb9fd5443c19df1bb039915aa871c534e6de813124eafd"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.C'",
+      "kind": "definition",
+      "paper": "Section 5.3 example: C'",
+      "native": false,
+      "sha256": "def0c171f907e6be356f65c1a53cf0ca76cec860b50ba939ac5f3bac0604aab0"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.D'",
+      "kind": "definition",
+      "paper": "Section 5.3 example: D'",
+      "native": false,
+      "sha256": "11fdaa10e4f0362965053d96e997f90f97fa5babeff71e7e6791dd31c70dc95a"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.slots",
+      "kind": "definition",
+      "paper": "Section 5.3 example: slots",
+      "native": false,
+      "sha256": "8b77b1389fe5ec156a1404bf67c58ba330bfe724b365f9d9c72499aee8683d1c"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.remainderCodes",
+      "kind": "definition",
+      "paper": "Section 5.3 example: remainderCodes",
+      "native": false,
+      "sha256": "556155b781a8a780390dec0a8f814cc159ca384f4e53d177ea9754c4070fbc5f"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.affineCertificate",
+      "kind": "definition",
+      "paper": "Section 5.3 example: affineCertificate",
+      "native": false,
+      "sha256": "525799c7e874efe53544b084afa43ccba46691dede2b8ca0c9f5593112a42c83"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.quadraticCertificate",
+      "kind": "definition",
+      "paper": "Section 5.3 example: quadraticCertificate",
+      "native": false,
+      "sha256": "a8c1b47a42785e976e07a496c35392caebc6a8737c3046b0418a9041d734df2b"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.sum_sequence",
+      "kind": "theorem",
+      "paper": "Section 5.3 example: total sum",
+      "native": false,
+      "sha256": "03f114facc2cdb1140dfb8cf284a31b03422287b82224208d76a859391e07ca2"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.no_short_zero",
+      "kind": "theorem",
+      "paper": "Section 5.3 example: no short zero",
+      "native": false,
+      "sha256": "ecc5b190f24b205597a9632d0903aad611eacdfbfa59a602f1e1acc1041e835e"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.no_long_zero",
+      "kind": "theorem",
+      "paper": "Section 5.3 example: no long zero",
+      "native": false,
+      "sha256": "17019476c4bce54d656b71be3cf891f0c9035007b85979c1a0be905a94d766b5"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.no_three_disjoint",
+      "kind": "theorem",
+      "paper": "Section 5.3 example: no three disjoint zeros",
+      "native": false,
+      "sha256": "99ea13ecaf3195c47f436699e22a135f92d4c7e988f4b451832fb1967ac602f0"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.B_zero",
+      "kind": "theorem",
+      "paper": "Section 5.3 example: five-term zero B",
+      "native": false,
+      "sha256": "0522b471bd7a466c9fd51ea8883382a1d14b9a878c4b8260ef014dac15aafff6"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.five_zero_sets",
+      "kind": "theorem",
+      "paper": "Section 5.3 example: five zero sets",
+      "native": false,
+      "sha256": "b1bc283f1a7cb29942565aa403ddac100f104fa7881a3e8ce1c7763076a508d9"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.indicator_identity",
+      "kind": "theorem",
+      "paper": "Section 5.3 example: five-set vector identity",
+      "native": false,
+      "sha256": "6aca41a8c0b5a72516df0af6d4fcc2dff133ad1a1c79502d0dbd97f96313b993"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.remainder_identity",
+      "kind": "theorem",
+      "paper": "Section 5.3 example: affine identity",
+      "native": false,
+      "sha256": "67195faa9d1311db68ea83e51506ca66874394ca8ca9a141496a3b6fe6c44f5d"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.quadratic_identity",
+      "kind": "theorem",
+      "paper": "Section 5.3 example: quadratic lift",
+      "native": false,
+      "sha256": "478ec7d6a5cfde562e40abfb1a05299f913829c4fffbb2acabd1b3a4ff618516"
+    },
+    {
+      "name": "DavenportProject.QuaternaryExample.quadratic_certificate_check",
+      "kind": "theorem",
+      "paper": "Section 5.3 example: printed certificate check",
+      "native": false,
+      "sha256": "40fe7f81fee5053cbb52cb1734a2f2b3f1d73e910b81d036e8c82842e5fdae8a"
     }
   ]
 }
