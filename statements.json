@@ -1,5 +1,5 @@
 {
-  "description": "The formalized statements of Pop, Rad and Țurcaș, \"Integral zero-sum incidence identities and Davenport constants in rank three\". The original 43 declaration entries retain their author-approved hashes. Additional paper-v4 declarations were recorded during the proof-alignment run. `sha256` hashes the whitespace-normalized `pp.all` elaboration (`#check @name` for theorems, `#print name` for definitions). Checked by scripts/check_statements.py.",
+  "description": "The formalized statements of Pop, Rad and Țurcaș, \"Integral zero-sum incidence identities and Davenport constants in rank three\". `sha256` is the hash of the whitespace-normalized `pp.all` elaboration of each declaration (`#check @name` for theorems, `#print name` for definitions). Checked by scripts/check_statements.py.",
   "module": "DavenportProject",
   "native_checks": [
     "DavenportProject.CubeFour.Checks.top",
@@ -391,7 +391,7 @@
     {
       "name": "DavenportProject.card_support_le_of_isShortZeroFree_cube_three_by_enumeration",
       "kind": "theorem",
-      "paper": "Appendix A.1: redundant cross-check",
+      "paper": "Lemma 5.1(2): proof by enumeration",
       "native": false,
       "sha256": "47ceee15a28536f6c4aabc08184664fb5609270e1e001aa029a5f87a82340be7"
     },
