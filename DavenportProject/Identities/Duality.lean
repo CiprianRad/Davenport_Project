@@ -49,7 +49,7 @@ theorem eval_indicator_prod_X {K : Type*} [CommSemiring K] (E J : Finset ι)
 
 end Identities
 
-/-- **Lemma 2.1(3)**: over a field, `u` has an `𝓘_t`-identity iff it
+/-- **Lemma 2.1(3), Section 2**: over a field, `u` has an `𝓘_t`-identity iff it
 has no separator of degree at most `t`. -/
 theorem hasIncidenceIdentity_iff_not_hasSeparator (K : Type*) [Field K] [Fintype ι]
     (u : ι → G) (t : ℕ) :

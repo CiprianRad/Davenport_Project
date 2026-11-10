@@ -75,7 +75,7 @@ end Identities
 variable {G : Type*} [AddCommGroup G] {ι : Type*}
 
 open Identities in
-/-- **Lemma 2.1(1)**: `c` is an `𝓘_t`-identity over `R` iff
+/-- **Lemma 2.1(1), Section 2**: `c` is an `𝓘_t`-identity over `R` iff
 `∑_E c_E P(𝟙_E) = P(0)` for every polynomial `P` of degree at most `t`. -/
 theorem isIncidenceIdentity_iff_eval {R : Type*} [CommRing R] [Fintype ι] (u : ι → G)
     (t : ℕ) (c : Finset ι → R) :
@@ -86,7 +86,8 @@ theorem isIncidenceIdentity_iff_eval {R : Type*} [CommRing R] [Fintype ι] (u : 
   classical
   constructor
   · rintro ⟨h1, hJ⟩ P hP
-    -- the moment `∑_{E ⊇ supp m} c E` vanishes unless `m = 0`
+    -- Boolean multilinear reduction replaces each exponent vector by its support.
+    -- The moment `∑_{E ⊇ supp m} c E` vanishes unless `m = 0`.
     have key : ∀ m ∈ P.support,
         ∑ E ∈ zeroSets u, c E * (if m.support ⊆ E then P.coeff m else 0) =
           if m = 0 then P.coeff m else 0 := by
@@ -132,7 +133,7 @@ theorem isIncidenceIdentity_iff_eval {R : Type*} [CommRing R] [Fintype ι] (u : 
         rw [ite_eq_right_of_eq_false _ _ (eq_false hJE), ite_eq_right_of_eq_false _ _ (eq_false h'),
           mul_zero]
 
-/-- **Lemma 2.1(2)**: an integral `𝓘_t`-identity is an `𝓘_t`-identity
+/-- **Lemma 2.1(2), Section 2**: an integral `𝓘_t`-identity is an `𝓘_t`-identity
 over every commutative ring, by reduction of the coefficients. -/
 theorem IsIncidenceIdentity.intCast (R : Type*) [CommRing R] [Fintype ι] {u : ι → G}
     {t : ℕ} {c : Finset ι → ℤ} (hc : IsIncidenceIdentity ℤ u t c) :

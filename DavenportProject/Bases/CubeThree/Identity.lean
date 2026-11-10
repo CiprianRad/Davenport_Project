@@ -399,7 +399,8 @@ Proof (with a smaller normalization than the paper's):
   set since `D(C_3^3) = 7` (Olson, `davenport_pi_zmod_prime_pow`); two disjoint zero sets give
   an identity (`hasIncidenceIdentity_of_pairwise_disjoint`, `t = 1`).
 * Otherwise the sequence is short-zero-free. Its support has at most eight points
-  (`card_support_le_of_isShortZeroFree_cube_three`) and every multiplicity is at most two, so
+  by affine-plane counting (`card_support_le_of_isShortZeroFree_cube_three`), and every
+  multiplicity is at most two. Adjoining zero to the support gives a cap. Thus
   two distinct values `x, y` occur twice each. A linear normalization sends `x, y` to
   `e₁, e₂` and, if possible, a third term to `e₃` (`hasIncidenceIdentity_of_doubled`). After
   sorting by codes, the 3,382 resulting cases are checked by the kernel against explicit
@@ -490,7 +491,7 @@ theorem exists_doubled (u : Fin 10 → (Fin 3 → ZMod 3)) (hshort : ∀ E, IsZe
 
 end CubeThree.Identity
 
-/-- **Lemma 5.1(1)** (finite computation): every ten-term sequence over
+/-- **Lemma 5.1(1), Section 5.2** (finite computation): every ten-term sequence over
 `C_3^3` has an integral `𝓘_1`-identity. -/
 theorem hasIncidenceIdentity_cube_three_ten (u : Fin 10 → (Fin 3 → ZMod 3)) :
     HasIncidenceIdentity ℤ u 1 := by

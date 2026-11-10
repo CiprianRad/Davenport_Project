@@ -50,7 +50,7 @@ theorem kappa_le_of_forall_hasIncidenceIdentity [Finite G] (K : Type*) [Field K]
 
 end Bases
 
-/-- **Theorem B**, first sentence: for `m ∈ {2,3,4}` and `t ≥ 0`, every
+/-- **Theorem B, Section 5**, first sentence: for `m ∈ {2,3,4}` and `t ≥ 0`, every
 indexed sequence of `m(t+3) - 2` terms over `C_m^3` has an integral `𝓘_t`-identity. -/
 theorem hasIncidenceIdentity_cube (m : ℕ) (hm : m = 2 ∨ m = 3 ∨ m = 4) (t : ℕ)
     (u : Fin (m * (t + 3) - 2) → (Fin 3 → ZMod m)) :
@@ -60,14 +60,14 @@ theorem hasIncidenceIdentity_cube (m : ℕ) (hm : m = 2 ∨ m = 3 ∨ m = 4) (t 
   · exact Bases.hasIncidenceIdentity_cube_three t u
   · exact Bases.hasIncidenceIdentity_cube_four t u
 
-/-- **Theorem B**, second sentence, upper bound:
+/-- **Theorem B, Section 5**, second sentence, upper bound:
 `κ_t(C_m^3;K) ≤ m(t+3) - 2` for every field `K`. -/
 theorem kappa_cube_le (m : ℕ) [NeZero m] (hm : m = 2 ∨ m = 3 ∨ m = 4) (t : ℕ)
     (K : Type*) [Field K] :
     kappa (Fin 3 → ZMod m) K t ≤ m * (t + 3) - 2 :=
   Bases.kappa_le_of_forall_hasIncidenceIdentity K (hasIncidenceIdentity_cube m hm t)
 
-/-- **Theorem B**, second sentence, sharpness: equality whenever the
+/-- **Theorem B, Section 5**, second sentence, sharpness: equality whenever the
 characteristic of `K` is zero or does not divide `m` (with Proposition 4.1). -/
 theorem kappa_cube_eq (m : ℕ) [NeZero m] (hm : m = 2 ∨ m = 3 ∨ m = 4) (t : ℕ)
     (K : Type*) [Field K] (hK : ringChar K = 0 ∨ ¬ ringChar K ∣ m) :

@@ -146,8 +146,8 @@ private theorem hasIncidenceIdentity_fanoSeq (x : Fin 3 → ZMod 2) (hx : x ≠ 
     rw [sum_fanoW, (hthrough j).1, (hthrough j).2]
     norm_num
 
-/-- **Section 5.1, Fano construction**: six distinct nonzero terms of `C_2^3` (the Fano plane minus a point)
-have an integral `𝓘_1`-identity. -/
+/-- **Section 5.1, Fano construction**: six distinct nonzero terms of `C_2^3`
+(the Fano plane minus a point) have an integral `𝓘_1`-identity. -/
 theorem hasIncidenceIdentity_fano (u : Fin 6 → (Fin 3 → ZMod 2)) (hinj : Function.Injective u)
     (hne : ∀ i, u i ≠ 0) :
     HasIncidenceIdentity ℤ u 1 := by

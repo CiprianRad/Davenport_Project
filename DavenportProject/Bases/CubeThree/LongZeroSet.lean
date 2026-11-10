@@ -356,7 +356,7 @@ theorem exists_rep {u : Fin 13 → (Fin 3 → ZMod 3)} (hu : IsShortZeroFree u) 
 
 end CubeThree
 
-/-- **Lemma 5.2**: every short-zero-free sequence of thirteen terms over
+/-- **Lemma 5.2, Section 5.2**: every short-zero-free sequence of thirteen terms over
 `C_3^3` has a zero set of size at least eleven. -/
 theorem exists_large_zeroSet_cube_three (u : Fin 13 → (Fin 3 → ZMod 3))
     (hu : IsShortZeroFree u) :

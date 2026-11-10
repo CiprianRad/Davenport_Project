@@ -23,9 +23,11 @@ public section
 
 namespace DavenportProject
 
-/-- **Lemma 3.1**: for `H = ⊕_{i} C_{p^{a_i}}` and `M = ∑_i (p^{a_i} - 1)`,
+/-- **Lemma 3.1, Section 3**: for `H = ⊕_{i} C_{p^{a_i}}` and `M = ∑_i (p^{a_i} - 1)`,
 and arbitrary labels `v_1, …, v_N ∈ H`, the Boolean function `z ↦ 𝟙[∑_j z_j v_j = 0] ∈ 𝔽_p`
-is represented by a multilinear polynomial over `𝔽_p` of degree at most `M`. -/
+is represented by a multilinear polynomial over `𝔽_p` of degree at most `M`.
+The construction expands the paper's product `∏_j (1 + z_j (X^{v_j} - 1))` in the group algebra
+and takes its identity coefficient; augmentation nilpotence gives the degree bound. -/
 theorem exists_multilinear_zeroSum_indicator (p : ℕ) [Fact p.Prime] {r : ℕ} (a : Fin r → ℕ)
     {N : ℕ} (v : Fin N → ((i : Fin r) → ZMod (p ^ a i))) :
     ∃ P : MvPolynomial (Fin N) (ZMod p),

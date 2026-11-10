@@ -112,11 +112,11 @@ open Identities
 ## Proof of Lemma 2.2(1)
 
 The identity is the inclusion–exclusion one: for every nonempty `S ⊆ Fin (t + 1)` the union
-`⋃_{k ∈ S} B k` is a zero set, and it receives the weight `(-1) ^ (#S + 1)`. Weights of repeated
-unions add up.
+`⋃_{k ∈ S} B k` is a zero set, and it receives the weight `(-1) ^ (#S + 1)`. The implementation sums weights over union fibers; disjoint
+nonempty blocks make these unions distinct.
 -/
 
-/-- **Lemma 2.2(1)**: `t + 1` pairwise disjoint zero sets give an
+/-- **Lemma 2.2(1), Section 2**: `t + 1` pairwise disjoint zero sets give an
 integral `𝓘_t`-identity. -/
 theorem hasIncidenceIdentity_of_pairwise_disjoint [Fintype ι] (u : ι → G) (t : ℕ)
     (B : Fin (t + 1) → Finset ι) (hB : ∀ k, IsZeroSet u (B k))

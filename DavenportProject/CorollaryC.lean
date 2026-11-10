@@ -280,7 +280,7 @@ end CorollaryC
 -- The proof does not use the paper's normalization `a ≤ b ≤ c`, which the statement keeps.
 set_option linter.unusedVariables false in
 open CorollaryC in
-/-- **Corollary C**, eq. (1.4): for `m ∈ {2,3,4}`, a prime `p ∤ m` and
+/-- **Corollary C, Section 6**, eq. (1.4): for `m ∈ {2,3,4}`, a prime `p ∤ m` and
 `0 ≤ a ≤ b ≤ c`, `D(C_{mp^a} ⊕ C_{mp^b} ⊕ C_{mp^c}) = m(p^a + p^b + p^c) - 2`. -/
 theorem davenport_zmod_prod_three (m : ℕ) [NeZero m] (hm : m = 2 ∨ m = 3 ∨ m = 4) (p : ℕ)
     [Fact p.Prime] (hpm : ¬ p ∣ m) (a b c : ℕ) (hab : a ≤ b) (hbc : b ≤ c) :

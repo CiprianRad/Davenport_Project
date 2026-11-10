@@ -202,7 +202,7 @@ theorem three_le_exponent : 3 ≤ AddMonoid.exponent (Fin 3 → ZMod 3) := by
 end CubeThree.Support
 
 /-!
-## Proof of Lemma 5.1(2)
+## Redundant enumeration cross-check of Lemma 5.1(2)
 
 The exponent of `(ZMod 3)^3` is `3`, so the support `A` of
 a short-zero-free sequence contains no zero, no two distinct points with sum zero and no three
