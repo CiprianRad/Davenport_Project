@@ -35,8 +35,8 @@ For `S : Finset ι`, the subsequence `fun i : S => u i` has zero sets `E : Finse
 correspond to the zero sets of `u` contained in `S` via `E ↦ E.map (Embedding.subtype _)`.
 We also record a reweighting lemma: given a weight function on finsets of `ι` defined as a
 sum of indicator terms over a family `E ↦ g E`, sums against it reduce to sums over the
-indexing family (so junk values of the old weights are never read). Finally, an
-inclusion–exclusion formula for disjointness is used in Lemma 2.2(3).
+indexing family (so junk values of the old weights are never read). We also record
+a weighted inclusion–exclusion formula for disjointness.
 -/
 
 namespace Identities
@@ -297,20 +297,21 @@ theorem hasIncidenceIdentity_of_disjoint_zeroSet [Fintype ι] (u : ι → G) {t 
 
 With `s = (-1) ^ t` and `c` the old identity on `T` (read only on the zero sets of the
 subsequence), the new weights are `c E` on `lift E`, `-s * c E` on `Z \ lift E`, and `s` on `Z`.
-The moment conditions are checked directly via inclusion–exclusion.
+The polynomial `P(z) - s P(1_Z-z)` loses its top degree; evaluating the old identity
+at that polynomial and rearranging gives the new one, as in Section 2 of the paper.
 -/
 
-/-- **Lemma 2.2(3)**: for `t ≥ 1`, an integral `𝓘_{t-1}`-identity on a
+/-- **Lemma 2.2(3), Section 2** (complement construction): for `t ≥ 1`, an integral
+`𝓘_{t-1}`-identity on a
 proper subsequence `T ⊊ Z` of a zero set `Z` gives an integral `𝓘_t`-identity. -/
 theorem hasIncidenceIdentity_of_ssubset_zeroSet [Fintype ι] (u : ι → G) {t : ℕ}
     (ht : 1 ≤ t) (Z T : Finset ι) (hZ : IsZeroSet u Z) (hTZ : T ⊂ Z)
     (hT : HasIncidenceIdentity ℤ (fun i : T => u i) (t - 1)) :
     HasIncidenceIdentity ℤ u t := by
   classical
-  obtain ⟨c, hc1, hcJ⟩ := hT
+  obtain ⟨c, hc⟩ := hT
   set Z' := zeroSets (fun i : T => u i)
   set s : ℤ := (-1) ^ t with hs
-  have hss : s * s = 1 := by rw [hs, ← mul_pow]; simp
   have hTZ' : T ⊆ Z := hTZ.subset
   obtain ⟨x₀, hx₀Z, hx₀T⟩ := exists_of_ssubset hTZ
   have hlift : ∀ E ∈ Z', liftSub T E ∈ zeroSets u := fun E hE =>
@@ -332,90 +333,32 @@ theorem hasIncidenceIdentity_of_ssubset_zeroSet [Fintype ι] (u : ι → G) {t :
     simp_rw [ite_mul, one_mul, zero_mul]
     rw [sum_ite_eq]
     simp [mem_zeroSets.2 hZ]
-  refine ⟨c', ?_, fun J hJ1 hJt => ?_⟩
-  · have := key (fun _ => 1)
-    simp only [mul_one] at this
-    rw [this, hc1]
-    ring
-  · have hm := key (fun F => if J ⊆ F then 1 else 0)
-    simp only [mul_ite, mul_one, mul_zero] at hm
-    rw [sum_filter, hm]
-    by_cases hJZ : J ⊆ Z
-    swap
-    · have h1 : ∀ E : Finset T, ¬ J ⊆ liftSub T E := fun E h =>
-        hJZ (h.trans ((liftSub_subset T E).trans hTZ'))
-      have h2 : ∀ E : Finset T, ¬ J ⊆ Z \ liftSub T E := fun E h => hJZ (h.trans sdiff_subset)
-      simp [h1, h2, hJZ]
-    set J' : Finset T := J.subtype (· ∈ T) with hJ'
-    have hD : ∀ E : Finset T, J ⊆ Z \ liftSub T E ↔ Disjoint J' E := by
-      intro E
-      rw [subset_sdiff, and_iff_right hJZ, disjoint_left, disjoint_left]
-      constructor
-      · intro h y hy hyE
-        rw [hJ', mem_subtype] at hy
-        exact h hy (mem_liftSub.2 ⟨y.2, hyE⟩)
-      · intro h x hx hxL
-        obtain ⟨hxT, hxE⟩ := mem_liftSub.1 hxL
-        exact h (by rw [hJ', mem_subtype]; exact hx) hxE
-    have hL : ∀ E : Finset T, J ⊆ liftSub T E ↔ J ⊆ T ∧ J' ⊆ E := by
-      intro E
-      constructor
-      · intro h
-        refine ⟨h.trans (liftSub_subset T E), fun y hy => ?_⟩
-        rw [hJ', mem_subtype] at hy
-        obtain ⟨_, h'⟩ := mem_liftSub.1 (h hy)
-        exact h'
-      · rintro ⟨hJT, h⟩ x hx
-        exact mem_liftSub.2 ⟨hJT hx, h (by rw [hJ', mem_subtype]; exact hx)⟩
-    simp only [hD, hL, hJZ, ite_true]
-    rw [sum_ite_disjoint_eq Z' c J']
-    simp only [Int.cast_id]
-    have hcardJ' : #J' ≤ #J := by rw [hJ', card_subtype]; exact card_filter_le _ _
-    have hM : ∀ K : Finset T, 1 ≤ #K → #K ≤ t - 1 → ∑ E ∈ Z' with K ⊆ E, c E = 0 :=
-      fun K h1 h2 => by convert hcJ K h1 h2
-    have hM0 : ∑ E ∈ Z' with ∅ ⊆ E, c E = 1 := by
-      rw [filter_true_of_mem (fun _ _ => empty_subset _)]; exact hc1
-    by_cases hsmall : #J' ≤ t - 1
-    · have hA : ∑ K ∈ J'.powerset, (-1 : ℤ) ^ #K * ∑ E ∈ Z' with K ⊆ E, c E = 1 := by
-        rw [sum_eq_single ∅]
-        · simp [hc1]
-        · intro K hK hKne
-          rw [hM K (card_pos.2 (nonempty_iff_ne_empty.2 hKne))
-            ((card_le_card (mem_powerset.1 hK)).trans hsmall), mul_zero]
-        · intro h
-          exact absurd (empty_mem_powerset J') h
-      rw [hA]
-      by_cases hJT : J ⊆ T
-      · have hJ'c : #J' = #J := by rw [hJ', card_subtype, filter_true_of_mem hJT]
-        simp only [hJT, true_and]
-        rw [← sum_filter, hM J' (hJ'c ▸ hJ1) hsmall]
-        ring
-      · simp [hJT]
-    · have hJ'eq : #J' = #J := by omega
-      have hJt' : #J' = t := by omega
-      have hJT : J ⊆ T := by
-        rw [hJ', card_subtype] at hJ'eq
-        intro x hx
-        exact filter_card_eq hJ'eq x hx
-      have hJ'ne : (∅ : Finset T) ≠ J' := by
-        intro h
-        rw [← h, card_empty] at hJt'
-        omega
-      have hA : ∑ K ∈ J'.powerset, (-1 : ℤ) ^ #K * ∑ E ∈ Z' with K ⊆ E, c E =
-          1 + s * ∑ E ∈ Z' with J' ⊆ E, c E := by
-        rw [sum_eq_add ∅ J' hJ'ne]
-        · simp [hc1, hJt', hs]
-        · intro K hK hKne
-          have hlt : #K < #J' :=
-            card_lt_card (ssubset_of_subset_of_ne (mem_powerset.1 hK) hKne.2)
-          rw [hM K (card_pos.2 (nonempty_iff_ne_empty.2 hKne.1)) (by omega), mul_zero]
-        · intro h
-          exact absurd (empty_mem_powerset J') h
-        · intro h
-          exact absurd (mem_powerset_self J') h
-      rw [hA]
-      simp only [hJT, true_and]
-      rw [← sum_filter]
-      linear_combination (-∑ E ∈ Z' with J' ⊆ E, c E) * hss
+  -- Lemma 2.1(1): check evaluations, after restricting P to the positions of Z.
+  refine ⟨c', (isIncidenceIdentity_iff_eval u t c').2 ?_⟩
+  intro P hP
+  -- Section 2: R_P(z) = P(z) - (-1)^t P(1_Z-z). Complementation multiplies
+  -- every degree-t squarefree term by (-1)^t; those top terms cancel.
+  have hRlt : (PolynomialLifting.complementDifference P t T Z).totalDegree < t :=
+    (PolynomialLifting.degree_complementDifference P T Z hP).trans_lt
+      (Nat.sub_lt ht (by decide))
+  have hR := (isIncidenceIdentity_iff_eval (fun i : T => u i) (t - 1) c).1 hc
+    (PolynomialLifting.complementDifference P t T Z) (Nat.le_sub_one_of_lt hRlt)
+  have hR0 : MvPolynomial.eval 0 (PolynomialLifting.complementDifference P t T Z) =
+      MvPolynomial.eval 0 P - s * MvPolynomial.eval ((Z : Set ι).indicator 1) P := by
+    simpa [s] using PolynomialLifting.eval_complementDifference P t T Z hTZ' ∅
+  -- Evaluate the old identity at R_P and rearrange. The weights in `key` are
+  -- exactly c_E, -s*c_E on the complements, and s on the whole zero set Z.
+  simp_rw [PolynomialLifting.eval_complementDifference P t T Z hTZ', mul_sub] at hR
+  rw [sum_sub_distrib, hR0] at hR
+  have hscale :
+      (∑ E ∈ Z', c E * ((-1 : ℤ)^t *
+        MvPolynomial.eval (((Z \ liftSub T E : Finset ι) : Set ι).indicator 1) P)) =
+      s * ∑ E ∈ Z', c E *
+        MvPolynomial.eval (((Z \ liftSub T E : Finset ι) : Set ι).indicator 1) P := by
+    rw [mul_sum]
+    exact sum_congr rfl fun E _ => by dsimp [s]; ring
+  rw [hscale] at hR
+  rw [key]
+  linear_combination hR
 
 end DavenportProject
