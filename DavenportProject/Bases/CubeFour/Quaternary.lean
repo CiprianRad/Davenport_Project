@@ -6,6 +6,10 @@ Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 module
 
 public import DavenportProject.Defs
+import DavenportProject.Invariants
+import DavenportProject.Bases.Basic
+import Mathlib.Tactic.FinCases
+import Mathlib.Data.Fin.VecNotation
 import DavenportProject.Bases.CubeFour.Checks
 import DavenportProject.Bases.CubeFour.Enumeration
 import DavenportProject.Bases.CubeFour.Eta
@@ -41,7 +45,7 @@ open Finset CubeFour DavenportCompute
 Proof (with a different normalization than the paper's; finite part by
 `native_decide`):
 * A zero set `E` with `#E ≤ 4` leaves at least ten terms outside it, which contain a zero set since
-  `D(C_4^3) = 10`; Lemma 2.2(2) with `t = 1` gives an identity.
+  `D(C_4^3) = 10`; the two disjoint zero sets give the identity by Lemma 2.2(1).
 * Otherwise the sequence is short-zero-free. An injective additive map and a sorting reindexing
   turn it into a sorted code list that is normalized (`exists_sortedCodes`): the standard basis
   vectors are chosen among the terms with maximal multiplicities. The enumeration of all such
@@ -52,18 +56,39 @@ Proof (with a different normalization than the paper's; finite part by
   sets and 36,461 get a stored certificate of one of 6,963 orbits, moved by a linear map.
 -/
 
-/-- A zero set of size at most four gives an integral `𝓘_1`-identity: the ten terms outside it
-contain a zero set (`D(C_4^3) = 10`), and Lemma 2.2(2) applies. -/
+/-- **Lemma 5.3, Section 5.3, fourteen-term reduction**: a zero set of at most four
+positions leaves ten terms and hence a disjoint zero set. Lemma 2.2(1) gives the identity. -/
 theorem CubeFour.hasIncidenceIdentity_one_of_card_le_four {u : Fin 14 → (Fin 3 → ZMod 4)}
     {E : Finset (Fin 14)} (hE : IsZeroSet u E) (hcard : #E ≤ 4) : HasIncidenceIdentity ℤ u 1 := by
+  -- Delete the short zero set; Olson's D(C₄³) = 10 supplies a second zero set.
   obtain ⟨S, hS, hS10⟩ := exists_subset_card_eq (s := Eᶜ) (n := 10)
     (by rw [card_compl, Fintype.card_fin]; omega)
-  exact hasIncidenceIdentity_of_disjoint_zeroSet u le_rfl E S hE
-    (disjoint_left.2 fun i hi => mem_compl.1 (hS hi))
-    (Bases.hasIncidenceIdentity_zero_of_card_eq_ten
-      (by rw [Fintype.card_coe, hS10]) _)
+  let e := S.orderEmbOfFin hS10
+  obtain ⟨F', hF'⟩ := ((davenport_eq_iff _ 10).1 Bases.davenport_cube_four).1
+    (fun i => u (e i))
+  let F := F'.map e.toEmbedding
+  have hF : IsZeroSet u F := by
+    refine ⟨hF'.1.map, ?_⟩
+    rw [sum_map]
+    exact hF'.2
+  have hdisj : Disjoint E F := by
+    rw [disjoint_iff_ne]
+    rintro a ha b hb rfl
+    obtain ⟨i, -, rfl⟩ := mem_map.1 hb
+    exact (mem_compl.1 (hS (S.orderEmbOfFin_mem hS10 i))) ha
+  -- The two disjoint zero sets give the weights +1,+1,-1 of Lemma 2.2(1).
+  refine hasIncidenceIdentity_of_pairwise_disjoint u 1 ![E, F] ?_ ?_
+  · intro k
+    fin_cases k
+    exacts [hE, hF]
+  · intro i j hij
+    fin_cases i <;> fin_cases j
+    · exact absurd rfl hij
+    · exact hdisj
+    · exact hdisj.symm
+    · exact absurd rfl hij
 
-/-- **Lemma 5.3(1)** (finite computation): every fourteen-term
+/-- **Lemma 5.3(1), Section 5.3** (finite computation): every fourteen-term
 sequence over `C_4^3` has an integral `𝓘_1`-identity. -/
 theorem hasIncidenceIdentity_cube_four_fourteen (u : Fin 14 → (Fin 3 → ZMod 4)) :
     HasIncidenceIdentity ℤ u 1 := by
