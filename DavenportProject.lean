@@ -16,6 +16,7 @@ public import DavenportProject.Transfer.Augmentation
 public import DavenportProject.Transfer.Indicator
 public import DavenportProject.Transfer.Olson
 public import DavenportProject.Transfer.TheoremA
+public import DavenportProject.Transfer.BlockBound
 public import DavenportProject.Sharpness
 public import DavenportProject.CharacteristicTwo
 public import DavenportProject.Bases.Basic
