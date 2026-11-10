@@ -113,9 +113,9 @@ Proof (with a different normalization than the paper's; finite part by
 * A zero set `Z` with at least fifteen positions contains fourteen positions properly;
   their affine identity lifts by Lemma 2.2(3).
 * The remaining short-zero-free sequences become normalized sorted code lists
-  (`exists_sortedCodes`). The unchanged complete enumeration (`Checks.top`, `Checks.chunks18`)
-  supplies a checked quadratic certificate, retaining its long-zero alternative as redundant
-  coverage. Of the 128,592 normalized lists, 126,240 have a long zero set and 2,352 receive a
+  (`exists_sortedCodes`). The complete enumeration (`Checks.top`, `Checks.chunks18`)
+  supplies a checked quadratic certificate; its long-zero alternative is redundant after the
+  previous step. Of the 128,592 normalized lists, 126,240 have a long zero set and 2,352 receive a
   stored certificate from one of 64 linear orbits.
 -/
 
@@ -172,7 +172,7 @@ theorem hasIncidenceIdentity_cube_four_eighteen (u : Fin 18 → (Fin 3 → ZMod 
   by_cases hl : ∃ Z, IsZeroSet u Z ∧ 15 ≤ #Z
   · obtain ⟨Z, hZ, hcard⟩ := hl
     exact hasIncidenceIdentity_of_fifteen_le_card hZ hcard
-  -- Only the remaining short-zero-free cases reach the unchanged normalized enumeration.
+  -- Only the remaining short-zero-free cases reach the normalized enumeration.
   have hu : ∀ E, IsZeroSet u E → 4 < #E := fun E hE => not_le.1 fun h => hs ⟨E, hE, h⟩
   obtain ⟨φ, hφ, σ, c, hdec, hsort, hlt, hszf, hg, hn3⟩ := exists_sortedCodes u hu
   have hleaf := leaf_of_prefixes leaf18 4 (List.ofFn c) (by simp) hsort hlt hszf hg Checks.top
@@ -181,7 +181,7 @@ theorem hasIncidenceIdentity_cube_four_eighteen (u : Fin 18 → (Fin 3 → ZMod 
     Bool.or_eq_true] at hleaf
   refine hasIncidenceIdentity_of_sortedCodes hφ hdec ?_
   rcases hleaf with h | h
-  · -- The checker retains its long-zero alternative as redundant coverage.
+  · -- The long-zero alternative of the checker is redundant coverage after the third step.
     obtain ⟨hZ, hcard⟩ := longZero_sound c h
     exact hasIncidenceIdentity_of_fifteen_le_card hZ hcard
   · exact hasIncidenceIdentity_of_check c _ h

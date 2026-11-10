@@ -22,9 +22,10 @@ import Mathlib.Tactic.IntervalCases
 `card_support_le_of_isShortZeroFree_cube_three`: the support of a short-zero-free sequence over
 `C_3^3` has at most eight points; seven-point supports have nonzero sum and eight-point supports
 sum to zero. The proof follows the affine-plane incidence argument of Section 5.2, implemented
-in `Bases.CubeThree.Planes`. The original kernel enumeration in `SupportCheck` is retained below
-as the separately named `card_support_le_of_isShortZeroFree_cube_three_by_enumeration`, a redundant
-cross-check; the paper-facing theorem and its downstream deductions use plane counting.
+in `Bases.CubeThree.Planes`. The kernel enumeration of `SupportCheck` gives a second proof below,
+`card_support_le_of_isShortZeroFree_cube_three_by_enumeration`, as a redundant cross-check;
+Lemma 5.2, the bound `η(C_3^3) ≤ 17` and Theorem B use plane counting only. That enumeration is
+not the one of Appendix A.1 of the paper and does not produce the counts of Table 2.
 -/
 
 public section

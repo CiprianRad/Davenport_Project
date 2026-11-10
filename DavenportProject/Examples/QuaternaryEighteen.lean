@@ -24,7 +24,7 @@ namespace DavenportProject.QuaternaryExample
 
 open Finset CubeFour
 
-/-- Section 5.3's sequence, in the base-four coding of the existing checker. -/
+/-- Section 5.3's sequence, in the base-four coding of the certificate checker. -/
 def codes : Fin 18 → ℕ := ![1,1,1,4,4,4,5,5,5,16,16,16,17,17,17,29,29,29]
 
 /-- `U=(100)³(010)³(110)³(001)³(101)³(131)³`, in exactly the paper's order. -/
@@ -227,7 +227,7 @@ def affineCertificate : DavenportCompute.Cert :=
 set_option maxHeartbeats 2000000 in
 -- Kernel reduction of the five affine masks and the explicit reindexing exceeds the default limit.
 /-- **Section 5.3 example**: the particular thirteen-term remainder has an affine identity.
-The existing sound checker verifies the five displayed masks, with kernel evaluation. -/
+The sound certificate checker verifies the five displayed masks, with kernel evaluation. -/
 theorem remainder_identity : HasIncidenceIdentity ℤ (fun i : ↥(Bᶜ) => sequence i) 1 := by
   have hc : DavenportCompute.check 4 1 (List.ofFn remainderCodes) affineCertificate = true := by
     decide +kernel
@@ -264,7 +264,7 @@ def quadraticCertificate : DavenportCompute.Cert :=
    (196600,1),(215136,1),(215239,-1),(261472,-1),(261575,1)]
 
 /-- **Supplement Section 3**: the printed eleven-set certificate independently passes
-the existing checker. The main example proof above uses the lifting construction. -/
+the certificate checker. The main example proof above uses the lifting construction. -/
 theorem quadratic_certificate_check :
     DavenportCompute.check 4 2 (List.ofFn codes) quadraticCertificate = true := by
   decide +kernel
