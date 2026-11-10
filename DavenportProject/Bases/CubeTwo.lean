@@ -9,6 +9,7 @@ public import DavenportProject.Defs
 import DavenportProject.Bases.Basic
 import DavenportProject.Identities.Operations
 import Mathlib.Data.Fin.VecNotation
+import Mathlib.Tactic.FinCases
 
 /-!
 # Theorem B for `m = 2`
@@ -58,7 +59,7 @@ theorem card_ne_zero_cube_two : Fintype.card {x : Fin 3 → ZMod 2 // x ≠ 0} =
   rw [Fintype.card_subtype_compl, Fintype.card_subtype_eq]
   simp
 
-/-- At least eight terms over `C_2^3` contain a zero or a repetition. -/
+/-- **Section 5.1**, the bound `η(C₂³) ≤ 8`: eight terms cannot be distinct and nonzero. -/
 theorem not_injective_and_ne_zero_of_le_card {ι : Type*} [Fintype ι]
     (u : ι → (Fin 3 → ZMod 2)) (h : 8 ≤ Fintype.card ι) :
     ¬ (Function.Injective u ∧ ∀ i, u i ≠ 0) := by
@@ -77,7 +78,8 @@ through `x` (zero quadruples) is an integral `𝓘_1`-identity. These are exactl
 sizes three and four, so the weight is `fanoW E = [#E = 3] - [#E = 4]`.
 
 For each of the seven choices of `x` we fix an enumeration `fanoSeq x` of the six remaining
-points and check the identity by kernel `decide`; an arbitrary injective nonzero sequence is a
+points. Kernel checks give the four/three set counts and two/two point incidences;
+the identity follows by subtracting these counts. An arbitrary injective nonzero sequence is a
 reindexing of `fanoSeq x`, and `hasIncidenceIdentity_comp_equiv` transports the identity.
 -/
 
@@ -98,32 +100,53 @@ private theorem fanoSeq_surj : ∀ x : Fin 3 → ZMod 2, x ≠ 0 → ∀ y : Fin
     y ≠ 0 → y ≠ x → ∃ k, fanoSeq x k = y := by
   decide +kernel
 
-/-- The finite check of the Fano construction, for each removed point `x`. -/
-private theorem fano_check : ∀ x : Fin 3 → ZMod 2, x ≠ 0 →
-    (∑ E ∈ univ.filter (fun E : Finset (Fin 6) => E.Nonempty ∧ ∑ i ∈ E, fanoSeq x i = 0),
-        fanoW E = 1) ∧
-      ∀ j : Fin 6, ∑ E ∈ univ.filter (fun E : Finset (Fin 6) =>
-        (E.Nonempty ∧ ∑ i ∈ E, fanoSeq x i = 0) ∧ j ∈ E), fanoW E = 0 := by
+/-- The zero sets of the six-point Fano configuration. -/
+private def fanoZeros (x : Fin 3 → ZMod 2) : Finset (Finset (Fin 6)) :=
+  univ.filter fun E => E.Nonempty ∧ ∑ i ∈ E, fanoSeq x i = 0
+
+/-- **Section 5.1, Fano incidence counts**: four selected lines, three complementary
+quadruples, and two of each through each remaining point. These are only small geometry checks. -/
+private theorem fano_counts : ∀ x : Fin 3 → ZMod 2, x ≠ 0 →
+    ((fanoZeros x).filter (fun E => #E = 3)).card = 4 ∧
+    ((fanoZeros x).filter (fun E => #E = 4)).card = 3 ∧
+    ∀ j : Fin 6,
+      (((fanoZeros x).filter (fun E => j ∈ E)).filter (fun E => #E = 3)).card = 2 ∧
+      (((fanoZeros x).filter (fun E => j ∈ E)).filter (fun E => #E = 4)).card = 2 := by
   decide +kernel
 
+/-- Sum the paper's weights as the number of selected lines minus complementary quadruples. -/
+private theorem sum_fanoW (S : Finset (Finset (Fin 6))) :
+    ∑ E ∈ S, fanoW E =
+      ((S.filter (fun E => #E = 3)).card : ℤ) - ((S.filter (fun E => #E = 4)).card : ℤ) := by
+  have hw (E : Finset (Fin 6)) : fanoW E =
+      (if #E = 3 then (1 : ℤ) else 0) - (if #E = 4 then 1 else 0) := by
+    unfold fanoW
+    split_ifs <;> norm_num
+    omega
+  simp_rw [hw]
+  rw [sum_sub_distrib, sum_boole, sum_boole]
+
+/-- **Section 5.1, Fano identity**: the total weight is `4 - 3 = 1` and every
+point moment is `2 - 2 = 0`, as counted in the paper. -/
 private theorem hasIncidenceIdentity_fanoSeq (x : Fin 3 → ZMod 2) (hx : x ≠ 0) :
     HasIncidenceIdentity ℤ (fanoSeq x) 1 := by
   classical
-  have hZ : zeroSets (fanoSeq x) =
-      univ.filter (fun E : Finset (Fin 6) => E.Nonempty ∧ ∑ i ∈ E, fanoSeq x i = 0) := by
+  have hZ : zeroSets (fanoSeq x) = fanoZeros x := by
     ext E
-    simp [mem_zeroSets, IsZeroSet]
-  obtain ⟨h1, h2⟩ := fano_check x hx
+    simp [fanoZeros, mem_zeroSets, IsZeroSet]
+  obtain ⟨h3, h4, hthrough⟩ := fano_counts x hx
   refine ⟨fanoW, ?_, ?_⟩
-  · rw [hZ]
-    convert h1
-  · intro J hJ1 hJ2
+  · -- The four line weights and three negative quadruple weights total one.
+    rw [hZ, sum_fanoW, h3, h4]
+    norm_num
+  · -- Through each remaining point, two positive and two negative weights cancel.
+    intro J hJ1 hJ2
     obtain ⟨j, rfl⟩ := card_eq_one.1 (le_antisymm hJ2 hJ1)
-    rw [hZ, filter_filter]
-    simp only [singleton_subset_iff]
-    convert h2 j
+    simp only [hZ, singleton_subset_iff]
+    rw [sum_fanoW, (hthrough j).1, (hthrough j).2]
+    norm_num
 
-/-- six distinct nonzero terms of `C_2^3` (the Fano plane minus a point)
+/-- **Section 5.1, Fano construction**: six distinct nonzero terms of `C_2^3` (the Fano plane minus a point)
 have an integral `𝓘_1`-identity. -/
 theorem hasIncidenceIdentity_fano (u : Fin 6 → (Fin 3 → ZMod 2)) (hinj : Function.Injective u)
     (hne : ∀ i, u i ≠ 0) :
@@ -151,8 +174,10 @@ theorem hasIncidenceIdentity_fano (u : Fin 6 → (Fin 3 → ZMod 2)) (hinj : Fun
 Every sequence of `2t + 4` terms over `C_2^3` has an integral `𝓘_t`-identity, by induction on
 `t` over an arbitrary index type of that cardinality:
 * `t = 0`: a zero set exists since `D(C_2^3) = 4`; apply Lemma 2.2(1).
-* `t ≥ 1`, with a zero set `B` of size at most two (a zero or a repeated term): `2t + 2` of the
-  remaining terms have an `𝓘_{t-1}`-identity by induction; apply Lemma 2.2(2).
+* `t = 1`, with a zero set of at most two positions: the remaining four terms supply a
+  second disjoint zero set, so Lemma 2.2(1) applies.
+* `t ≥ 2`, with a short zero set: the remainder has the preceding-degree identity;
+  apply the short-zero recurrence of Lemma 2.2(2).
 * otherwise the terms are distinct and nonzero, so there are at most seven of them; hence
   `t = 1`, the six terms form the Fano configuration, and `hasIncidenceIdentity_fano` applies.
 -/
@@ -167,7 +192,7 @@ theorem hasIncidenceIdentity_zero_of_card_eq_four {ι : Type*} [Fintype ι]
   exact hasIncidenceIdentity_of_pairwise_disjoint u 0 (fun _ => E.map e.symm.toEmbedding)
     (fun _ => hB) (fun i j hij => absurd (Subsingleton.elim (α := Fin 1) i j) hij)
 
-/-- Theorem B for `m = 2`, over an arbitrary index type with `2t + 4` positions. -/
+/-- **Theorem B for `m = 2`, Section 5.1**, over an arbitrary index type with `2t + 4` positions. -/
 theorem hasIncidenceIdentity_cube_two_of_card (t : ℕ) :
     ∀ (ι : Type) [Fintype ι], Fintype.card ι = 2 * t + 4 →
       ∀ u : ι → (Fin 3 → ZMod 2), HasIncidenceIdentity ℤ u t := by
@@ -196,8 +221,35 @@ theorem hasIncidenceIdentity_cube_two_of_card (t : ℕ) :
         omega
       obtain ⟨S, hS, hScard⟩ := exists_subset_card_eq hc
       have hSB : Disjoint S B := disjoint_left.2 fun i hi => mem_compl.1 (hS hi)
-      exact hasIncidenceIdentity_of_disjoint_zeroSet u (Nat.le_add_left 1 t) B S hB hSB
-        (ih S (by rw [Fintype.card_coe, hScard]) _)
+      by_cases ht : t = 0
+      · -- Degree one: the four remaining terms give a second zero set; use Lemma 2.2(1).
+        subst t
+        let e : S ≃ Fin 4 := Fintype.equivFinOfCardEq (by simpa using hScard)
+        let f : Fin 4 ↪ ι := e.symm.toEmbedding.trans (Function.Embedding.subtype (· ∈ S))
+        obtain ⟨F', hF'⟩ := ((davenport_eq_iff _ 4).1 davenport_cube_two).1 (fun k => u (f k))
+        let F := F'.map f
+        have hF : IsZeroSet u F := by
+          refine ⟨hF'.1.map, ?_⟩
+          rw [sum_map]
+          exact hF'.2
+        have hBF : Disjoint B F := by
+          rw [disjoint_iff_ne]
+          rintro a ha b hb rfl
+          obtain ⟨i, -, rfl⟩ := mem_map.1 hb
+          exact (disjoint_left.1 hSB (e.symm i).2) ha
+        refine hasIncidenceIdentity_of_pairwise_disjoint u 1 ![B, F] ?_ ?_
+        · intro k
+          fin_cases k
+          exacts [hB, hF]
+        · intro i j hij
+          fin_cases i <;> fin_cases j
+          · exact absurd rfl hij
+          · exact hBF
+          · exact hBF.symm
+          · exact absurd rfl hij
+      · -- Higher degrees: the short-zero recurrence is Lemma 2.2(2).
+        exact hasIncidenceIdentity_of_disjoint_zeroSet u (Nat.le_add_left 1 t) B S hB hSB
+          (ih S (by rw [Fintype.card_coe, hScard]) _)
 
 /-- Theorem B for `m = 2`: every sequence of `2(t+3) - 2` terms over
 `C_2^3` has an integral `𝓘_t`-identity. -/
