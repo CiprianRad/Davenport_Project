@@ -1,5 +1,5 @@
 {
-  "description": "The formalized statements of Pop, Rad and Țurcaș, \"Integral zero-sum incidence identities and Davenport constants in rank three\". `sha256` is the hash of the whitespace-normalized `pp.all` elaboration of each declaration (`#check @name` for theorems, `#print name` for definitions). Checked by scripts/check_statements.py.",
+  "description": "The formalized statements of Pop, Rad and Țurcaș, \"Integral zero-sum incidence identities and Davenport constants in rank three\". `sha256` is the hash of the whitespace-normalized `pp.all` elaboration of each declaration (`#check @name` for theorems, `#print name` for definitions), computed from the statements approved by the authors. Checked by scripts/check_statements.py.",
   "module": "DavenportProject",
   "native_checks": [
     "DavenportProject.CubeFour.Checks.top",
