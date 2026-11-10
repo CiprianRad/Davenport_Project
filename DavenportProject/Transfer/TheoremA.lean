@@ -7,7 +7,6 @@ module
 
 public import DavenportProject.Invariants
 public import Mathlib.GroupTheory.PGroup
-import DavenportProject.Identities.Duality
 import DavenportProject.Identities.Evaluation
 import DavenportProject.Transfer.Indicator
 import DavenportProject.Transfer.Olson
@@ -23,10 +22,10 @@ import Mathlib.GroupTheory.FiniteAbelian.Basic
 * `davenport_prod_le_of_hasIncidenceIdentity_int`: the same for integral identities, for every
   prime `p`.
 
-The proof uses Lemma 3.1, Olson's theorem, Lemma 2.1(3) and the structure theorem for finite
-abelian `p`-groups. The paper evaluates the identity at the indicator polynomial `P` of Lemma 3.1
-(through Lemma 2.1(1)); here the same step is phrased through Lemma 2.1(3): `P` would be a
-separator of degree at most `D(H) - 1` for the sequence over `Q`.
+The proof follows Section 3 of the paper: Lemma 3.1 supplies the kernel indicator `P`,
+Olson's theorem bounds its degree by `D(H) - 1`, and Lemma 2.1(1) evaluates the quotient
+identity at `P`. The resulting sum is one, so a nonzero summand selects a zero set
+in both factors. Integral coefficients are reduced modulo `p` by Lemma 2.1(2).
 -/
 
 public section
@@ -137,7 +136,7 @@ theorem exists_addEquiv_pi_zmod_prime_pow_davenport {p : ℕ} [Fact p.Prime] {H 
 
 end Transfer
 
-/-- **Theorem A** (transfer principle): if every sequence of `L(t)` terms
+/-- **Theorem A, Section 3** (transfer principle): if every sequence of `L(t)` terms
 over `Q` has an `𝓘_t`-identity over `𝔽_p`, then `D(Q ⊕ H) ≤ L(D(H) - 1)` for every finite
 abelian `p`-group `H`. -/
 theorem davenport_prod_le_of_hasIncidenceIdentity_zmod (Q : Type*) [AddCommGroup Q]
@@ -145,29 +144,41 @@ theorem davenport_prod_le_of_hasIncidenceIdentity_zmod (Q : Type*) [AddCommGroup
     (hL : ∀ t, ∀ u : Fin (L t) → Q, HasIncidenceIdentity (ZMod p) u t)
     (H : Type*) [AddCommGroup H] [Finite H] (hH : IsPGroup p (Multiplicative H)) :
     davenport (Q × H) ≤ L (davenport H - 1) := by
+  classical
+  -- Section 3: put M = D(H) - 1, using Olson's value after decomposing the p-group.
   obtain ⟨r, a, ⟨e⟩, hM⟩ := exists_addEquiv_pi_zmod_prime_pow_davenport hH
   refine davenport_le_of_forall fun w => ?_
-  by_contra hw
-  push Not at hw
   let u : Fin (L (davenport H - 1)) → Q := fun j => (w j).1
+  -- The quotient sequence has an identity; Lemma 3.1 gives the indicator of the labels.
+  obtain ⟨c, hc⟩ := hL _ u
   obtain ⟨P, -, hdeg, heval⟩ :=
     exists_multilinear_zeroSum_indicator p a (fun j => e (w j).2)
-  apply (hasIncidenceIdentity_iff_not_hasSeparator (ZMod p) u (davenport H - 1)).1
-    (hL _ u)
-  refine ⟨P, hdeg.trans hM.ge, ?_, fun E hE => ?_⟩
-  · have h0 := heval ∅
-    simpa using h0
-  · rw [heval E, ite_eq_right_iff]
-    intro hsum
-    exfalso
-    rw [← map_sum, e.map_eq_zero_iff] at hsum
-    refine hw E ⟨hE.1, Prod.ext ?_ ?_⟩
-    · rw [Prod.fst_sum]
-      exact hE.2
-    · rw [Prod.snd_sum]
-      exact hsum
+  have hzero : MvPolynomial.eval 0 P = 1 := by
+    simpa using heval ∅
+  -- Lemma 2.1(1): the weighted evaluations reproduce P(0) = 1.
+  have hsum := (isIncidenceIdentity_iff_eval u _ c).1 hc P (hdeg.trans hM.ge)
+  rw [hzero] at hsum
+  have hex : ∃ E ∈ zeroSets u,
+      MvPolynomial.eval ((E : Set _).indicator 1) P ≠ 0 := by
+    by_contra h
+    push Not at h
+    have hz : ∑ E ∈ zeroSets u, c E * MvPolynomial.eval ((E : Set _).indicator 1) P = 0 :=
+      Finset.sum_eq_zero fun E hE => by rw [h E hE, mul_zero]
+    exact one_ne_zero (hsum.symm.trans hz)
+  -- A nonzero summand chooses a nonempty quotient zero set whose label sum is also zero.
+  obtain ⟨E, hE, hPE⟩ := hex
+  have hkernel : ∑ j ∈ E, e (w j).2 = 0 := by
+    by_contra hn
+    exact hPE (by rw [heval E, ite_eq_right hn])
+  rw [← map_sum, e.map_eq_zero_iff] at hkernel
+  have hquotient := mem_zeroSets.1 hE
+  refine ⟨E, hquotient.1, Prod.ext ?_ ?_⟩
+  · rw [Prod.fst_sum]
+    exact hquotient.2
+  · rw [Prod.snd_sum]
+    exact hkernel
 
-/-- Theorem A, last sentence: if the identities are integral, the
+/-- **Theorem A, Section 3**, last sentence: if the identities are integral, the
 conclusion holds for every prime `p`. -/
 theorem davenport_prod_le_of_hasIncidenceIdentity_int (Q : Type*) [AddCommGroup Q]
     [Finite Q] (L : ℕ → ℕ) (hL : ∀ t, ∀ u : Fin (L t) → Q, HasIncidenceIdentity ℤ u t)
