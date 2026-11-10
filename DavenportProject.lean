@@ -17,6 +17,7 @@ public import DavenportProject.Transfer.Indicator
 public import DavenportProject.Transfer.Olson
 public import DavenportProject.Transfer.TheoremA
 public import DavenportProject.Sharpness
+public import DavenportProject.CharacteristicTwo
 public import DavenportProject.Bases.Basic
 public import DavenportProject.Bases.CubeTwo
 public import DavenportProject.Bases.CubeThree.Masks
