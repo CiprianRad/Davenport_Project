@@ -9,6 +9,7 @@ public import DavenportProject.Defs
 public import DavenportProject.Identities.Evaluation
 public import DavenportProject.Identities.Duality
 public import DavenportProject.Identities.Operations
+public import DavenportProject.Identities.Extension
 public import DavenportProject.Invariants
 public import DavenportProject.InvariantBounds
 public import DavenportProject.Transfer.Augmentation
