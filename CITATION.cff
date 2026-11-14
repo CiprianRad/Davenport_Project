@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: >-
+  If you use this formalization, please cite the paper it formalizes (preferred citation) and this
+  repository.
+title: >-
+  Davenport_Project: a Lean 4 formalization of "Integral zero-sum incidence identities and
+  Davenport constants in rank three"
+type: software
+authors:
+  - given-names: Claudiu G.
+    family-names: Pop
+  - given-names: George C.
+    family-names: Rad
+  - given-names: George C.
+    family-names: Țurcaș
+license: Apache-2.0
+repository-code: https://github.com/CiprianRad/Davenport_Project_Palomar
+keywords:
+  - Lean 4
+  - Mathlib
+  - formalization
+  - zero-sum theory
+  - Davenport constant
+preferred-citation:
+  type: unpublished
+  title: Integral zero-sum incidence identities and Davenport constants in rank three
+  authors:
+    - given-names: Claudiu G.
+      family-names: Pop
+    - given-names: George C.
+      family-names: Rad
+    - given-names: George C.
+      family-names: Țurcaș
+  year: 2026
+  notes: Manuscript.
