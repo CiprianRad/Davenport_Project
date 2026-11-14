@@ -275,8 +275,10 @@ scripts/verify_comparator.sh
 ```
 
 The script runs `lake comparator` with NanoDa registered as an external kernel, as Palomar does.
-Palomar's own verification also tries the con-ron kernel, which is advisory there and takes about
-three times as long as Lean's kernel on this project.
+After the build, the run takes about 45 minutes on four cores (NanoDa about ten minutes, Lean's
+kernel about half an hour) and needs less than 3 GB of memory. Palomar's own verification also
+tries the con-ron kernel, which is advisory there; on this project con-ron needs more than the 30
+minutes Palomar allows it, so Palomar records it as declined for lack of time.
 
 ## The finite computations
 

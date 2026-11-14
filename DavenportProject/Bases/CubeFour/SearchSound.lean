@@ -309,28 +309,13 @@ theorem Good.lo_lt {acc : List ℕ} {st : State} (h : Good acc st) : st.lo < 64 
   · rw [he]; norm_num
   · exact h.lt _ hm
 
-theorem testBit_cands (st : State) (hF : st.F < 2 ^ 64) (hG : st.G < 2 ^ 64) (hlo : st.lo < 64)
-    (x : ℕ) : (cands st).testBit x = (decide (x < 64) && !st.F.testBit x && !st.G.testBit x &&
+-- Kept apart from `testBit_cands`: as one proof, the NanoDa kernel runs out of memory on it.
+/-- The bits of `cands st`, given the bits of its base mask `B`. -/
+theorem testBit_cands_of_base (st : State) (x B : ℕ) (hbase : ∀ y, B.testBit y =
+      (decide (y < 64) && !st.F.testBit y && !st.G.testBit y && decide (st.lo ≤ y))) :
+    (cond (B.testBit st.lo && !okRep st) (Nat.xor B (Nat.shiftLeft 1 st.lo)) B).testBit x =
+      (decide (x < 64) && !st.F.testBit x && !st.G.testBit x &&
       decide (st.lo ≤ x) && !(decide (x = st.lo) && !okRep st)) := by
-  have hbase : ∀ y,
-      (Nat.xor FULL (Nat.lor st.F (Nat.lor st.G (Nat.sub (Nat.shiftLeft 1 st.lo) 1)))).testBit y =
-        (decide (y < 64) && !st.F.testBit y && !st.G.testBit y && decide (st.lo ≤ y)) := by
-    intro y
-    have e : Nat.sub (Nat.shiftLeft 1 st.lo) 1 = 2 ^ st.lo - 1 := by
-      rw [show Nat.shiftLeft 1 st.lo = 1 <<< st.lo from rfl, Nat.shiftLeft_eq, one_mul]; rfl
-    rw [show Nat.xor FULL _ = FULL ^^^ (st.F ||| (st.G ||| (2 ^ st.lo - 1))) by rw [← e]; rfl,
-      Nat.testBit_xor, testBit_FULL, Nat.testBit_lor, Nat.testBit_lor, Nat.testBit_two_pow_sub_one]
-    by_cases h1 : y < 64
-    · by_cases h2 : y < st.lo <;> simp [h1, h2]; omega
-    · have hF' : st.F.testBit y = false :=
-        Nat.testBit_eq_false_of_lt (hF.trans_le (Nat.pow_le_pow_right (by norm_num) (by omega)))
-      have hG' : st.G.testBit y = false :=
-        Nat.testBit_eq_false_of_lt (hG.trans_le (Nat.pow_le_pow_right (by norm_num) (by omega)))
-      have h2 : ¬ y < st.lo := by omega
-      simp [h1, h2, hF', hG']
-  simp only [cands, force_eq, bitB_eq]
-  generalize hB : Nat.xor FULL (Nat.lor st.F (Nat.lor st.G (Nat.sub (Nat.shiftLeft 1 st.lo) 1))) = B
-    at hbase
   have hxor : ∀ y, (Nat.xor B (Nat.shiftLeft 1 st.lo)).testBit y =
       (B.testBit y ^^ decide (st.lo = y)) := fun y => by
     rw [show Nat.xor B (Nat.shiftLeft 1 st.lo) = B ^^^ (1 <<< st.lo) from rfl, Nat.testBit_xor,
@@ -351,6 +336,28 @@ theorem testBit_cands (st : State) (hF : st.F < 2 ^ 64) (hG : st.G < 2 ^ 64) (hl
       by_cases hx : x = st.lo
       · subst hx; rw [hbase] at hbl; simpa using hbl
       · simp [hx]
+
+theorem testBit_cands (st : State) (hF : st.F < 2 ^ 64) (hG : st.G < 2 ^ 64) (hlo : st.lo < 64)
+    (x : ℕ) : (cands st).testBit x = (decide (x < 64) && !st.F.testBit x && !st.G.testBit x &&
+      decide (st.lo ≤ x) && !(decide (x = st.lo) && !okRep st)) := by
+  have hbase : ∀ y,
+      (Nat.xor FULL (Nat.lor st.F (Nat.lor st.G (Nat.sub (Nat.shiftLeft 1 st.lo) 1)))).testBit y =
+        (decide (y < 64) && !st.F.testBit y && !st.G.testBit y && decide (st.lo ≤ y)) := by
+    intro y
+    have e : Nat.sub (Nat.shiftLeft 1 st.lo) 1 = 2 ^ st.lo - 1 := by
+      rw [show Nat.shiftLeft 1 st.lo = 1 <<< st.lo from rfl, Nat.shiftLeft_eq, one_mul]; rfl
+    rw [show Nat.xor FULL _ = FULL ^^^ (st.F ||| (st.G ||| (2 ^ st.lo - 1))) by rw [← e]; rfl,
+      Nat.testBit_xor, testBit_FULL, Nat.testBit_lor, Nat.testBit_lor, Nat.testBit_two_pow_sub_one]
+    by_cases h1 : y < 64
+    · by_cases h2 : y < st.lo <;> simp [h1, h2]; omega
+    · have hF' : st.F.testBit y = false :=
+        Nat.testBit_eq_false_of_lt (hF.trans_le (Nat.pow_le_pow_right (by norm_num) (by omega)))
+      have hG' : st.G.testBit y = false :=
+        Nat.testBit_eq_false_of_lt (hG.trans_le (Nat.pow_le_pow_right (by norm_num) (by omega)))
+      have h2 : ¬ y < st.lo := by omega
+      simp [h1, h2, hF', hG']
+  simp only [cands, force_eq, bitB_eq]
+  exact testBit_cands_of_base st x _ hbase
 
 /-- A path of allowed codes from `st`. -/
 def Path : State → List ℕ → Prop
