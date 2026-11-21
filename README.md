@@ -5,8 +5,10 @@
 This repository is the Lean 4 companion of the paper
 
 > C. G. Pop, G. C. Rad and G. C. Țurcaș, *Integral zero-sum incidence identities and Davenport
-> constants in rank three* (unpublished manuscript, November 2026; an arXiv version is
-> forthcoming).
+> constants in rank three*, [arXiv:2611.20197](https://arxiv.org/abs/2611.20197) (2026).
+
+The [supplement](supplement.pdf) gives the certificate counts, works through the eighteen-term
+example, and explains how to replay the Lean checks.
 
 The paper proves that
 
@@ -33,7 +35,7 @@ in detail.
 Every lemma, proposition, theorem and corollary of the paper is stated and proved here, together
 with the definitions they need, Remarks 3.2 and 4.2 and the worked example of Section 5.3. We have
 tried to make the formal proofs follow the written ones step by step, so that the two can be read
-side by side. Statement numbers are those of the manuscript.
+side by side. Statement numbers are those of the arXiv version.
 
 ## Finding your way
 
@@ -302,6 +304,7 @@ modules exactly. On the way they recover two numbers of Table 3 of the paper, th
 | [`DavenportProject/Bases/CubeFour/Search*.lean`](DavenportProject/Bases/CubeFour), [`Checks.lean`](DavenportProject/Bases/CubeFour/Checks.lean) | the soundness of that computation |
 | [`statements.json`](statements.json), [`scripts/check_statements.py`](scripts/check_statements.py) | the check of the statements and of their axioms |
 | [`scripts/l53/`](scripts/l53) | the programs that generated the certificates of Lemma 5.3 |
+| [`supplement.pdf`](supplement.pdf) | the supplement to the paper: certificate counts, the eighteen-term example, replaying the checks |
 | [`.github/workflows/`](.github/workflows) | continuous integration: the build and the statement check |
 
 ## How this was made
@@ -318,7 +321,8 @@ of Davenport_Project_Palomar.
 ## License and citation
 
 The code is released under the Apache License 2.0, see [`LICENSE`](LICENSE). If you use it,
-please cite the paper; the details are in [`CITATION.cff`](CITATION.cff).
+please cite the paper, [arXiv:2611.20197](https://arxiv.org/abs/2611.20197); the details are in
+[`CITATION.cff`](CITATION.cff).
 
 If something here is unclear, or a statement does not say what you expected it to say, we would
 like to know. Please open an issue.
