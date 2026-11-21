@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 // N=14, mode ABC guards+N3. Classify N3 leaves: L = has R (|R|<=3) with sum = total (zero set >= 11);
 // else P = has disjoint pair; else H = hard. Also count zero sets of size 10 etc.

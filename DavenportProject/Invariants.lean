@@ -81,7 +81,8 @@ theorem davenport_eq_iff (G : Type*) [AddCommGroup G] [Finite G] (L : ℕ) :
 
 /-! ## The invariant `κ_t(G;K)` -/
 
-/-- Every short enough sequence has a separator; this makes `kappa` well defined. -/
+/-- For every `t`, long enough sequences have no separator of degree at most `t`; this makes
+`kappa` well defined. -/
 theorem exists_length_without_separator (G : Type*) [AddCommGroup G] [Finite G]
     (K : Type*) [Field K] (t : ℕ) :
     ∃ N : ℕ, ∀ u : Fin N → G, ¬ HasSeparator K u t := by

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 // For each 14-term rep (one per line), find a +-1 I_1 certificate with 5 zero sets: A+B+C = D+E.
 // Output: codes... | A B C ; D E   (masks over positions). Fallback marker "NONE".

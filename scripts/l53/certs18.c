@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 // For each 18-term rep: find zero set B and a 5-set I_1 certificate (A1+A2+A3 = D1+D2) inside S = complement of B.
 // I_2 certificate: +B, +Ai, -(Ai|B), -Dj, +(Dj|B).  Output masks and coefficients.

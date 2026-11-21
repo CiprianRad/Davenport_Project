@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 """Validate representative certificates and write compact data lines: 'c0 c1 ... | m1 k1 m2 k2 ...'."""
 import itertools, json, sys

@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 // General N. Enumerate sorted SZF N-lists with guards (A),(B),(C) [e1/e2/e3 present or parity condition],
 // count nodes per depth, leaves, N3 leaves; classify N3 leaves; write hard N3 leaves.

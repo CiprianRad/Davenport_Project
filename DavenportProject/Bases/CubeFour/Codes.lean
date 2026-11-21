@@ -6,7 +6,6 @@ Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 module
 
 public import DavenportCompute.Basic
-public import DavenportCompute.Oracle
 public import DavenportProject.Defs
 public import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 public import Mathlib.Data.Fintype.Card
@@ -24,9 +23,9 @@ import Mathlib.Tactic.Ring
 
 Soundness of the computation library `DavenportCompute` used for Lemma 5.3:
 * the normal form predicates (`P1g`, `P2g`, `P3g`, `IsNormal`) and list-level short-zero-freeness;
-* the bit sets and sum sets of the enumeration (`mem_shiftSet`, `mem_R1_iff`, …);
+* code arithmetic (`add4_comm`, `add4_assoc`, `add4_neg4`, `codeSum_perm`);
 * decoding of codes (`dec`, `enc`, `dec_add4`, `dec_codeSum`);
-* soundness of the certificate checker (`hasIncidenceIdentity_of_check`, `longZero_sound`).
+* soundness of the certificate checker (`hasIncidenceIdentity_of_check`).
 -/
 
 @[expose] public section
@@ -88,20 +87,11 @@ def Guards (F : List ℕ) : Prop :=
     (16 ∈ F ∨ ∀ y ∈ F, P3 y = false)
 
 /-!
-## Semantics of the bit sets and sum sets of the Lemma 5.3 computation
+## Code arithmetic
 
-Facts about the code-level definitions of `DavenportCompute`, needed for the soundness
-of the enumeration (`DavenportProject.Bases.CubeFour.Enumeration`):
-
-* code arithmetic: `add4` is commutative and associative, `add4 a (neg4 a) = 0`, `0` is neutral
-  on codes `< 64`, and `codeSum` is invariant under permutations (`codeSum_perm`);
-* bit sets: `mem_or`, `mem_bit`, and `mem_shiftSet` (the translate `S + x`);
-* sum sets: every member of `R1 p`, `R2 p`, `R3 p` is the code sum of a sublist of `p` of length
-  `1`, `2`, `3` (`mem_R1_iff`, `exists_sublist_of_mem_R2`, `exists_sublist_of_mem_R3`);
-* the loop `allFrom` (`allFrom_eq_true_iff`).
+`add4` is commutative and associative, `add4 a (neg4 a) = 0`, `0` is neutral on codes `< 64`, and
+`codeSum` is invariant under permutations (`codeSum_perm`).
 -/
-
-/-! ### Code arithmetic -/
 
 theorem add4_eq (a b : ℕ) : add4 a b =
     (a % 4 + b % 4) % 4 + 4 * ((a / 4 % 4 + b / 4 % 4) % 4) +
@@ -171,145 +161,6 @@ theorem codeSum_perm {q q' : List ℕ} (h : q.Perm q') : codeSum q = codeSum q' 
   | cons x _ ih => simp only [codeSum, ih]
   | swap x y l => exact add4_left_comm y x (codeSum l)
   | trans _ _ ih₁ ih₂ => exact ih₁.trans ih₂
-
-/-! ### Bit sets -/
-
-theorem toNat_toUInt64_mod (x : ℕ) : x.toUInt64.toNat % 64 = x % 64 := by
-  simp [Nat.toUInt64_eq]
-
-theorem bne_eq_toNat_bne (a b : UInt64) : (a != b) = (a.toNat != b.toNat) := by
-  rw [Bool.eq_iff_iff]
-  simp [UInt64.toNat_inj]
-
-/-- Membership in a bit set is a bit test; the code is taken modulo `64`. -/
-theorem mem_eq_testBit (S : UInt64) (x : ℕ) : mem S x = S.toNat.testBit (x % 64) := by
-  unfold mem
-  rw [Nat.testBit, bne_eq_toNat_bne, UInt64.toNat_and, UInt64.toNat_shiftRight,
-    toNat_toUInt64_mod, Nat.and_comm]
-  rfl
-
-theorem toNat_bit (x : ℕ) : (bit x).toNat = 2 ^ (x % 64) := by
-  unfold bit
-  rw [UInt64.toNat_shiftLeft, toNat_toUInt64_mod, UInt64.toNat_one, Nat.one_shiftLeft,
-    Nat.mod_eq_of_lt (Nat.pow_lt_pow_right (by decide) (Nat.mod_lt x (by decide)))]
-
-theorem mem_zero (x : ℕ) : mem 0 x = false := by
-  rw [mem_eq_testBit, UInt64.toNat_zero, Nat.zero_testBit]
-
-/-- Membership in a union of bit sets. -/
-theorem mem_or (S T : UInt64) (x : ℕ) : mem (S ||| T) x = (mem S x || mem T x) := by
-  rw [mem_eq_testBit, mem_eq_testBit, mem_eq_testBit, UInt64.toNat_or, Nat.testBit_or]
-
-/-- Membership in a singleton bit set. -/
-theorem mem_bit {x y : ℕ} (hx : x < 64) (hy : y < 64) : mem (bit x) y = decide (x = y) := by
-  rw [mem_eq_testBit, toNat_bit, Nat.testBit_two_pow, Nat.mod_eq_of_lt hx, Nat.mod_eq_of_lt hy]
-
-theorem mem_shiftAux {S T : UInt64} {x t : ℕ} (ht : t < 64) (n : ℕ) :
-    mem (shiftAux S x n T) t = true ↔
-      mem T t = true ∨ ∃ b < n, mem S b = true ∧ add4 b x = t := by
-  induction n generalizing T with
-  | zero => simp [shiftAux]
-  | succ n ih =>
-    rw [shiftAux, ih]
-    by_cases hn : mem S n = true
-    · rw [ite_eq_left hn, mem_or, mem_bit (add4_lt n x) ht, Bool.or_eq_true, decide_eq_true_eq]
-      constructor
-      · rintro ((h | h) | ⟨b, hb, h⟩)
-        · exact Or.inl h
-        · exact Or.inr ⟨n, by omega, hn, h⟩
-        · exact Or.inr ⟨b, by omega, h⟩
-      · rintro (h | ⟨b, hb, hS, h⟩)
-        · exact Or.inl (Or.inl h)
-        · rcases Nat.lt_succ_iff_lt_or_eq.1 hb with hb | rfl
-          · exact Or.inr ⟨b, hb, hS, h⟩
-          · exact Or.inl (Or.inr h)
-    · rw [ite_eq_right hn]
-      constructor
-      · rintro (h | ⟨b, hb, h⟩)
-        · exact Or.inl h
-        · exact Or.inr ⟨b, by omega, h⟩
-      · rintro (h | ⟨b, hb, hS, h⟩)
-        · exact Or.inl h
-        · rcases Nat.lt_succ_iff_lt_or_eq.1 hb with hb | rfl
-          · exact Or.inr ⟨b, hb, hS, h⟩
-          · exact absurd hS hn
-
-/-- `shiftSet S x` is the translate `S + x`. (The bound `hx` is not needed.) -/
-theorem mem_shiftSet {S : UInt64} {x t : ℕ} (hx : x < 64) (ht : t < 64) :
-    mem (shiftSet S x) t = true ↔ ∃ b < 64, mem S b = true ∧ add4 b x = t := by
-  have _ := hx
-  rw [shiftSet, mem_shiftAux ht, mem_zero]
-  simp
-
-/-! ### Sum sets -/
-
-/-- `R1 p` is the set of entries of `p`. -/
-theorem mem_R1_iff {p : List ℕ} (hp : ∀ y ∈ p, y < 64) {s : ℕ} (hs : s < 64) :
-    mem (R1 p) s = true ↔ s ∈ p := by
-  induction p with
-  | nil => simp [R1, mem_zero]
-  | cons x p ih =>
-    rw [R1, mem_or, mem_bit (hp x (by simp)) hs, Bool.or_eq_true,
-      ih (fun y hy => hp y (by simp [hy]))]
-    simp [eq_comm, or_comm]
-
-theorem exists_sublist_of_mem_R1 {p : List ℕ} (hp : ∀ y ∈ p, y < 64) {s : ℕ} (hs : s < 64)
-    (h : mem (R1 p) s = true) : ∃ q, q.Sublist p ∧ q.length = 1 ∧ codeSum q = s :=
-  ⟨[s], List.singleton_sublist.2 ((mem_R1_iff hp hs).1 h), rfl, codeSum_singleton hs⟩
-
-/-- Every member of `R2 p` is the code sum of a sublist of `p` of length two. -/
-theorem exists_sublist_of_mem_R2 {p : List ℕ} (hp : ∀ y ∈ p, y < 64) {s : ℕ} (hs : s < 64)
-    (h : mem (R2 p) s = true) : ∃ q, q.Sublist p ∧ q.length = 2 ∧ codeSum q = s := by
-  induction p with
-  | nil => simp [R2, mem_zero] at h
-  | cons x p ih =>
-    have hx : x < 64 := hp x (by simp)
-    have hp' : ∀ y ∈ p, y < 64 := fun y hy => hp y (by simp [hy])
-    rw [R2, mem_or, Bool.or_eq_true] at h
-    rcases h with h | h
-    · obtain ⟨q, hq, hl, hsum⟩ := ih hp' h
-      exact ⟨q, hq.cons x, hl, hsum⟩
-    · obtain ⟨b, hb, hmem, rfl⟩ := (mem_shiftSet hx hs).1 h
-      refine ⟨[x, b], (List.singleton_sublist.2 ((mem_R1_iff hp' hb).1 hmem)).cons_cons x,
-        rfl, ?_⟩
-      rw [codeSum, codeSum_singleton hb, add4_comm]
-
-/-- Every member of `R3 p` is the code sum of a sublist of `p` of length three. -/
-theorem exists_sublist_of_mem_R3 {p : List ℕ} (hp : ∀ y ∈ p, y < 64) {s : ℕ} (hs : s < 64)
-    (h : mem (R3 p) s = true) : ∃ q, q.Sublist p ∧ q.length = 3 ∧ codeSum q = s := by
-  induction p with
-  | nil => simp [R3, mem_zero] at h
-  | cons x p ih =>
-    have hx : x < 64 := hp x (by simp)
-    have hp' : ∀ y ∈ p, y < 64 := fun y hy => hp y (by simp [hy])
-    rw [R3, mem_or, Bool.or_eq_true] at h
-    rcases h with h | h
-    · obtain ⟨q, hq, hl, hsum⟩ := ih hp' h
-      exact ⟨q, hq.cons x, hl, hsum⟩
-    · obtain ⟨b, hb, hmem, rfl⟩ := (mem_shiftSet hx hs).1 h
-      obtain ⟨q, hq, hl, hsum⟩ := exists_sublist_of_mem_R2 hp' hb hmem
-      refine ⟨x :: q, hq.cons_cons x, by simp [hl], ?_⟩
-      rw [codeSum, hsum, add4_comm]
-
-/-! ### Loops -/
-
-/-- `allFrom f x n` tests `f` on the interval `[x, x + n)`. -/
-theorem allFrom_eq_true_iff {f : ℕ → Bool} {x n : ℕ} :
-    allFrom f x n = true ↔ ∀ y, x ≤ y → y < x + n → f y = true := by
-  induction n generalizing x with
-  | zero =>
-    simp only [allFrom, true_iff]
-    intro y h₁ h₂
-    omega
-  | succ n ih =>
-    rw [allFrom, Bool.and_eq_true, ih]
-    constructor
-    · rintro ⟨h₀, h⟩ y hxy hy
-      rcases Nat.eq_or_lt_of_le hxy with rfl | hxy
-      · exact h₀
-      · exact h y hxy (by omega)
-    · intro h
-      exact ⟨h x (Nat.le_refl x) (by omega), fun y hy₁ hy₂ => h y (by omega) (by omega)⟩
 
 /-!
 ## Codes of elements of `C_m^3`
@@ -502,9 +353,7 @@ theorem listSZF_ofFn {N : ℕ} (c : Fin N → ℕ) (hc : ∀ i, c i < 64)
 `j < N` whose bit is set in the mask `E`.
 
 * `hasIncidenceIdentity_of_check`: if `DavenportCompute.check m t (List.ofFn f) cert = true`,
-  then the decoded sequence `k ↦ dec m (f k)` has an integral `𝓘_t`-identity;
-* `longZero_sound`: if `DavenportCompute.longZero (List.ofFn f) Z = true`, then `toSet N Z` is a
-  zero set of the decoded sequence with at least fifteen elements.
+  then the decoded sequence `k ↦ dec m (f k)` has an integral `𝓘_t`-identity.
 -/
 
 /-- The index set encoded by a mask. -/
@@ -600,27 +449,5 @@ theorem hasIncidenceIdentity_of_check {m N t : ℕ} (f : Fin N → ℕ) (cert : 
       have h1' := h1.resolve_left (by omega)
       obtain ⟨x, rfl⟩ := Finset.card_eq_one.mp (show #J = 1 by omega)
       simpa [coeffSum, mem_toSet] using h1' x x.2
-
-/-! ### Long zero sets -/
-
-theorem countP_range_eq_sum (p : ℕ → Bool) (n : ℕ) :
-    (List.range n).countP p = ∑ i ∈ Finset.range n, if p i then 1 else 0 := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-    rw [List.range_succ, List.countP_append, Finset.sum_range_succ, ih]
-    simp [List.countP_singleton]
-
-/-- `popcountBelow` counts the elements of `toSet`. -/
-theorem card_toSet (N Z : ℕ) : #(toSet N Z) = popcountBelow N Z := by
-  rw [toSet, Finset.card_filter, popcountBelow, countP_range_eq_sum,
-    Fin.sum_univ_eq_sum_range (fun i => if Z.testBit i then 1 else 0)]
-
-/-- Soundness of `longZero`. -/
-theorem longZero_sound {N : ℕ} (f : Fin N → ℕ) {Z : ℕ}
-    (h : DavenportCompute.longZero (List.ofFn f) Z = true) :
-    IsZeroSet (fun k => dec 4 (f k)) (toSet N Z) ∧ 15 ≤ #(toSet N Z) := by
-  simp only [longZero, Bool.and_eq_true, decide_eq_true_eq, List.length_ofFn] at h
-  exact ⟨isZeroSet_of_isZeroMask f h.1, (card_toSet N Z).symm ▸ h.2⟩
 
 end DavenportProject.CubeFour

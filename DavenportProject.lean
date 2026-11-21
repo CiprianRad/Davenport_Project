@@ -32,8 +32,10 @@ public import DavenportProject.Bases.CubeThree.LongZeroSet
 public import DavenportProject.Bases.CubeThree
 public import DavenportProject.Bases.CubeFour.Eta
 public import DavenportProject.Bases.CubeFour.Codes
-public import DavenportProject.Bases.CubeFour.Enumeration
 public import DavenportProject.Bases.CubeFour.Normalize
+public import DavenportProject.Bases.CubeFour.SearchBits
+public import DavenportProject.Bases.CubeFour.SearchSound
+public import DavenportProject.Bases.CubeFour.SearchCert
 public import DavenportProject.Bases.CubeFour.Checks
 public import DavenportProject.Bases.CubeFour.Quaternary
 public import DavenportProject.Bases.CubeFour

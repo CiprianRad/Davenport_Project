@@ -11,7 +11,6 @@ import DavenportProject.Bases.Basic
 import Mathlib.Tactic.FinCases
 import Mathlib.Data.Fin.VecNotation
 import DavenportProject.Bases.CubeFour.Checks
-import DavenportProject.Bases.CubeFour.Enumeration
 import DavenportProject.Bases.CubeFour.Eta
 import DavenportProject.Bases.CubeFour.Normalize
 import DavenportProject.Identities.Operations
@@ -25,9 +24,10 @@ import DavenportProject.Identities.Operations
   `C_4^3` has an integral `𝓘_2`-identity.
 
 Short zero sets reduce to smaller cases through Lemma 2.2. Short-zero-free sequences are
-normalized (`exists_sortedCodes`) and covered by the enumeration (`leaf_of_prefixes`), whose leaves
-pass the certificate checks of `Bases.CubeFour.Checks`. The normalization differs from the paper's
-projection-and-lift; the orbit counts of the hard cases agree with the paper (6,963 and 64).
+normalized (`exists_sortedCodes`), and the finite part is `identity_or_long` of
+`Bases.CubeFour.Checks`: an enumeration and certificate checks evaluated by Lean's kernel. The
+normalization differs from the paper's projection-and-lift; the orbit counts of the hard cases agree
+with the paper (6,963 and 64).
 
 The paper states Lemma 5.3 as one sentence; (1) and (2) are its fourteen-term and eighteen-term
 assertions. Its two enumerations are in Appendix A.2 and A.3, with the counts in Table 3.
@@ -42,18 +42,18 @@ open Finset CubeFour DavenportCompute
 /-!
 ## Proof of Lemma 5.3(1)
 
-Proof (with a different normalization than the paper's; finite part by
-`native_decide`):
+Proof (with a different normalization than the paper's; finite part checked by the kernel):
 * A zero set `E` with `#E ≤ 4` leaves at least ten terms outside it, which contain a zero set since
   `D(C_4^3) = 10`; the two disjoint zero sets give the identity by Lemma 2.2(1).
 * Otherwise the sequence is short-zero-free. An injective additive map and a sorting reindexing
   turn it into a sorted code list that is normalized (`exists_sortedCodes`): the standard basis
   vectors are chosen among the terms with maximal multiplicities. The enumeration of all such
-  lists (`DavenportCompute.gdfs`) is complete (`leaf_of_prefixes`), and its native evaluation
-  (`Checks.top`, `Checks.chunks14`) shows that every normalized list passes `leaf14`: a
-  certificate checked by `DavenportCompute.check`, whose soundness is
-  `hasIncidenceIdentity_of_check`. Of the 562,180 normalized lists, 525,719 get two disjoint zero
-  sets and 36,461 get a stored certificate of one of 6,963 orbits, moved by a linear map.
+  lists (`DavenportCompute.Search.dfs`) reaches it (`path_of_sorted`), and the kernel checks show
+  that it has a zero set of at least eleven positions or a checked certificate
+  (`identity_or_long`). A zero set of at least eleven positions contains a zero set of at most ten
+  (`D(C_4^3) = 10`), so it splits into two disjoint zero sets. Of the 562,180 normalized lists,
+  487,258 have such a long zero set, 38,461 have two disjoint zero sets and 36,461 get the
+  certificate of one of 6,963 orbits, moved by a linear map.
 -/
 
 /-- **Lemma 5.3, Section 5.3, fourteen-term reduction**: a zero set of at most four
@@ -88,6 +88,46 @@ theorem CubeFour.hasIncidenceIdentity_one_of_card_le_four {u : Fin 14 → (Fin 3
     · exact hdisj.symm
     · exact absurd rfl hij
 
+/-- A zero set with at least eleven positions in a fourteen-term sequence contains a zero set of
+at most ten positions (`D(C_4^3) = 10`); together with its complement in the long zero set this
+gives two disjoint zero sets, and Lemma 2.2(1) gives the identity. -/
+theorem CubeFour.hasIncidenceIdentity_one_of_eleven_le_card {u : Fin 14 → (Fin 3 → ZMod 4)}
+    {Z : Finset (Fin 14)} (hZ : IsZeroSet u Z) (hcard : 11 ≤ #Z) : HasIncidenceIdentity ℤ u 1 := by
+  classical
+  obtain ⟨S, hSZ, hS10⟩ := exists_subset_card_eq (s := Z) (n := 10) (by omega)
+  let e := S.orderEmbOfFin hS10
+  obtain ⟨E', hE'⟩ := ((davenport_eq_iff _ 10).1 Bases.davenport_cube_four).1 (fun i => u (e i))
+  let E := E'.map e.toEmbedding
+  have hE : IsZeroSet u E := by
+    refine ⟨hE'.1.map, ?_⟩
+    rw [sum_map]
+    exact hE'.2
+  have hEZ : E ⊆ Z := fun i hi => by
+    obtain ⟨j, -, rfl⟩ := mem_map.1 hi
+    exact hSZ (S.orderEmbOfFin_mem hS10 j)
+  have hEcard : #E ≤ 10 := by
+    rw [card_map]
+    exact (card_le_univ E').trans (by simp)
+  have hF : IsZeroSet u (Z \ E) := by
+    refine ⟨?_, ?_⟩
+    · rw [Finset.sdiff_nonempty]
+      intro h
+      have := card_le_card h
+      omega
+    · have := sum_sdiff hEZ (f := u)
+      rw [hZ.2, hE.2, add_zero] at this
+      exact this
+  refine hasIncidenceIdentity_of_pairwise_disjoint u 1 ![E, Z \ E] ?_ ?_
+  · intro k
+    fin_cases k
+    exacts [hE, hF]
+  · intro i j hij
+    fin_cases i <;> fin_cases j
+    · exact absurd rfl hij
+    · exact disjoint_sdiff
+    · exact disjoint_sdiff.symm
+    · exact absurd rfl hij
+
 /-- **Lemma 5.3(1), Section 5.3** (finite computation): every fourteen-term
 sequence over `C_4^3` has an integral `𝓘_1`-identity. -/
 theorem hasIncidenceIdentity_cube_four_fourteen (u : Fin 14 → (Fin 3 → ZMod 4)) :
@@ -97,26 +137,26 @@ theorem hasIncidenceIdentity_cube_four_fourteen (u : Fin 14 → (Fin 3 → ZMod 
     exact hasIncidenceIdentity_one_of_card_le_four hE hcard
   · have hu : ∀ E, IsZeroSet u E → 4 < #E := fun E hE => not_le.1 fun h => hs ⟨E, hE, h⟩
     obtain ⟨φ, hφ, σ, c, hdec, hsort, hlt, hszf, hg, hn3⟩ := exists_sortedCodes u hu
-    have hleaf := leaf_of_prefixes leaf14 4 (List.ofFn c) (by simp) hsort hlt hszf hg Checks.top
-      (by simpa using Checks.chunks14)
-    simp only [leaf14, hn3, Bool.not_true, Bool.false_or, List.reverse_reverse] at hleaf
-    exact hasIncidenceIdentity_of_sortedCodes hφ hdec (hasIncidenceIdentity_of_check c _ hleaf)
+    refine hasIncidenceIdentity_of_sortedCodes hφ hdec ?_
+    rcases identity_or_long (Or.inl ⟨rfl, rfl⟩) c hsort hlt hszf hg hn3 with h | ⟨Z, hZ, hcard⟩
+    · exact h
+    · exact hasIncidenceIdentity_one_of_eleven_le_card hZ (by omega)
 
 /-!
 ## Proof of Lemma 5.3(2)
 
-Proof (with a different normalization than the paper's; finite part by
-`native_decide`), following the reductions of the paper:
+Proof (with a different normalization than the paper's; finite part checked by the kernel),
+following the reductions of the paper:
 * A zero set `B` with `#B ≤ 4` leaves at least fourteen terms outside it, which have an integral
   `𝓘_1`-identity by Lemma 5.3(1); Lemma 2.2(2) with `t = 2` applies.
 * Three disjoint zero sets give a quadratic identity directly by Lemma 2.2(1).
 * A zero set `Z` with at least fifteen positions contains fourteen positions properly;
   their affine identity lifts by Lemma 2.2(3).
 * The remaining short-zero-free sequences become normalized sorted code lists
-  (`exists_sortedCodes`). The complete enumeration (`Checks.top`, `Checks.chunks18`)
-  supplies a checked quadratic certificate; its long-zero alternative is redundant after the
-  previous step. Of the 128,592 normalized lists, 126,240 have a long zero set and 2,352 receive a
-  stored certificate from one of 64 linear orbits.
+  (`exists_sortedCodes`). The kernel checks (`identity_or_long`) give a zero set of at least
+  fifteen positions, handled as in the previous step, or a checked quadratic certificate. Of the
+  128,592 normalized lists, 126,240 have such a long zero set and 2,352 receive the certificate of
+  one of 64 linear orbits.
 -/
 
 /-- Lemma 5.3(1) over any index type with fourteen elements. -/
@@ -175,15 +215,10 @@ theorem hasIncidenceIdentity_cube_four_eighteen (u : Fin 18 → (Fin 3 → ZMod 
   -- Only the remaining short-zero-free cases reach the normalized enumeration.
   have hu : ∀ E, IsZeroSet u E → 4 < #E := fun E hE => not_le.1 fun h => hs ⟨E, hE, h⟩
   obtain ⟨φ, hφ, σ, c, hdec, hsort, hlt, hszf, hg, hn3⟩ := exists_sortedCodes u hu
-  have hleaf := leaf_of_prefixes leaf18 4 (List.ofFn c) (by simp) hsort hlt hszf hg Checks.top
-    (by simpa using Checks.chunks18)
-  simp only [leaf18, hn3, Bool.not_true, Bool.false_or, List.reverse_reverse,
-    Bool.or_eq_true] at hleaf
   refine hasIncidenceIdentity_of_sortedCodes hφ hdec ?_
-  rcases hleaf with h | h
-  · -- The long-zero alternative of the checker is redundant coverage after the third step.
-    obtain ⟨hZ, hcard⟩ := longZero_sound c h
-    exact hasIncidenceIdentity_of_fifteen_le_card hZ hcard
-  · exact hasIncidenceIdentity_of_check c _ h
+  rcases identity_or_long (Or.inr ⟨rfl, rfl⟩) c hsort hlt hszf hg hn3 with h | ⟨Z, hZ, hcard⟩
+  · exact h
+  · -- A long zero set of the code sequence, handled as in the third step.
+    exact hasIncidenceIdentity_of_fifteen_le_card hZ (by omega)
 
 end DavenportProject

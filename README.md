@@ -5,7 +5,10 @@
 This repository is the Lean 4 companion of the paper
 
 > C. G. Pop, G. C. Rad and G. C. Țurcaș, *Integral zero-sum incidence identities and Davenport
-> constants in rank three* (manuscript, November 2026).
+> constants in rank three*, [arXiv:2611.20197](https://arxiv.org/abs/2611.20197) (2026).
+
+The [supplement](supplement.pdf) gives the certificate counts, works through the eighteen-term
+example, and explains how to replay the Lean checks.
 
 The paper proves that
 
@@ -21,10 +24,18 @@ In Lean the first one reads
 theorem davenport_cube_fifteen : davenport (Fin 3 → ZMod 15) = 43
 ```
 
+Earlier work covers, among the cubes C_n³ beyond the prime powers, the exponents n = 2pᵃ
+(W. A. Schmid, *Electron. J. Combin.* 18 (2011), P33) and n = 3·2ᵃ (B. Girard, *J. Éc. polytech.
+Math.* 5 (2018), 605–611), and the families of P. van Emde Boas and D. Kruyswijk (Mathematisch
+Centrum reports ZW 7/69 and 8/69, 1969); see W. Gao and A. Geroldinger, *Expo. Math.* 24 (2006),
+337–369, for a survey. The Davenport constant of a p-group is given by Olson's theorem
+(J. E. Olson, *J. Number Theory* 1 (1969), 8–10 and 195–199). The paper discusses this background
+in detail.
+
 Every lemma, proposition, theorem and corollary of the paper is stated and proved here, together
 with the definitions they need, Remarks 3.2 and 4.2 and the worked example of Section 5.3. We have
 tried to make the formal proofs follow the written ones step by step, so that the two can be read
-side by side. Statement numbers are those of the manuscript.
+side by side. Statement numbers are those of the arXiv version.
 
 ## Finding your way
 
@@ -38,6 +49,7 @@ Most visitors come with one of these questions.
 - *How do I run it?* See [Building and checking](#building-and-checking).
 - *What exactly did the computer compute?* See
   [The finite computations](#the-finite-computations).
+- *Where is the version for the Palomar registry?* See [Palomar and Comparator](#palomar-and-comparator).
 - *Where is the file I am looking for?* See [Layout](#layout).
 
 ## Reading the statements
@@ -167,9 +179,9 @@ Lean and the paper part ways in three places, all on purpose.
 
 1. **The two computer-assisted statements.** Lemma 5.1(1) and Lemma 5.3 rest on finite
    enumerations. The paper describes its own in Appendix A. The Lean proof uses another one, with
-   a normal form of its own, and proves inside Lean that it misses nothing. The reductions that
-   come before the enumeration are those of the paper. The numbers are in
-   [The finite computations](#the-finite-computations).
+   a normal form of its own, proves inside Lean that it misses nothing, and has it evaluated by
+   Lean's kernel. The reductions that come before the enumeration are those of the paper. The
+   numbers are in [The finite computations](#the-finite-computations).
 2. **Two results that the paper quotes are proved here.** Olson's theorem is proved by the
    nilpotence argument of Section 3, and the bound η(C₄³) ≤ 22 by a pigeonhole argument through
    reduction modulo two.
@@ -182,36 +194,41 @@ Lean and the paper part ways in three places, all on purpose.
 Not formalized: Remark 3.3, the conjecture (1.1), and D* as a definition of its own. The basis
 lower bounds that the proofs use are formalized.
 
-The supplement to the paper has a section about this repository.
-
 ## What is trusted
 
 [`statements.json`](statements.json) lists the 76 declarations that make up the formal
 counterpart of the paper: the definitions, the results, and the data of the worked example. For
 each of them the script [`scripts/check_statements.py`](scripts/check_statements.py) does two
 things. It compares a hash of the fully elaborated statement with the recorded one, so that no
-statement can change unnoticed. And it lists the axioms on which the proof depends.
+statement can change unnoticed. And it checks that the proof depends only on the three standard
+axioms of Lean: `propext`, `Classical.choice` and `Quot.sound`.
 
-- Everything that does not depend on Lemma 5.3 uses only the three standard axioms of Lean:
-  `propext`, `Classical.choice` and `Quot.sound`. This includes Lemma 5.1 and the worked example,
-  whose finite parts are evaluated by Lean's kernel (`decide +kernel`).
-- Lemma 5.3 needs a computation that is too large for the kernel. It is run as compiled code
-  (`native_decide`), in thirteen Boolean checks: seven for the fourteen-term statement, and all
-  thirteen for the eighteen-term one. The checks are in
-  [`Bases/CubeFour/Checks.lean`](DavenportProject/Bases/CubeFour/Checks.lean) and the folder next
-  to it. Lemma 5.3, Theorem B and Corollary C therefore also trust the Lean compiler, its bundled
-  C compiler and the runtime.
+All 76 pass, Lemma 5.3, Theorem B and Corollary C included. There is no `sorry`, there is no
+axiom of our own, and there is no `native_decide`: nothing compiled is trusted. The finite parts
+of Lemma 5.1(1), Lemma 5.3 and the worked example are evaluated by Lean's kernel
+(`decide +kernel`).
 
-Around those thirteen checks, the following is proved in Lean in the ordinary way:
+For Lemma 5.3 the computation is large, so it is written for the kernel and split into many
+checks:
 
-- the certificate checker is sound (`CubeFour.hasIncidenceIdentity_of_check`);
-- the enumeration reaches every normalized short-zero-free sequence (`CubeFour.leaf_of_prefixes`);
+- [`DavenportCompute/Search.lean`](DavenportCompute/Search.lean) (no Mathlib) is the enumeration of
+  the normalized sequences, with sets of codes as bit masks, and the certificate checker;
+- [`DavenportCompute/Checks/`](DavenportCompute/Checks) holds the kernel checks: `Checks.top`, the
+  enumeration down to 7,319 subtrees, and 512 chunk modules that check those subtrees and the
+  certificates found there, each by `decide +kernel`.
+
+Around these checks, the following is proved in Lean in the ordinary way:
+
+- the bit operations mean what they should (`DavenportProject.CubeFour.testBit_transl2`, …);
+- the enumeration reaches every normalized short-zero-free sequence
+  (`DavenportProject.CubeFour.path_of_sorted`, `DavenportProject.CubeFour.leaf_of_runs`);
+- the certificate checker is sound (`DavenportProject.CubeFour.hasIncidenceIdentity_of_checkEntries`);
 - every sequence can be brought to normal form by an injective additive map
-  (`CubeFour.exists_isNormal`).
+  (`DavenportProject.CubeFour.exists_isNormal`).
 
-The certificate tables in [`DavenportCompute/Data.lean`](DavenportCompute/Data.lean) and the
-search in [`DavenportCompute/Oracle.lean`](DavenportCompute/Oracle.lean) are not trusted. Every
-certificate is checked again before it is used, so a wrong table can only make the build fail.
+The certificate data in the chunk modules and the programs in [`scripts/l53/`](scripts/l53) that
+produced them are not trusted: every certificate is checked again by the kernel, so a wrong one
+can only make the build fail.
 
 ## Building and checking
 
@@ -224,12 +241,20 @@ python3 scripts/check_statements.py    # check statements and axioms
 ```
 
 The toolchain is `leanprover/lean4:v4.36.0-rc1` (see [`lean-toolchain`](lean-toolchain)), and
-Mathlib is pinned in [`lake-manifest.json`](lake-manifest.json). Once the Mathlib cache is in
-place, the build takes about two minutes on a laptop; the thirteen native checks are part of it.
-The last command should end with `76 declarations, 0 failure(s)`.
+Mathlib is pinned in [`lake-manifest.json`](lake-manifest.json). The kernel checks of Lemma 5.3
+take about 45 minutes of processor time in all, about ten minutes on four cores, and each needs at
+most about two gigabytes of memory. On a machine with little memory, limit the number of parallel
+jobs, for example `LEAN_NUM_THREADS=4 lake build`. The last command should end with
+`76 declarations, 0 failure(s)`.
 
-The library `DavenportCompute`, which holds the computation of Lemma 5.3, does not depend on
-Mathlib and is compiled to native code. Lean's bundled C toolchain is enough for that.
+## Palomar and Comparator
+
+The same formalization, with the files for the [Palomar registry](https://palomar-registry.org)
+of Lean-verified results, is in the repository
+[Davenport_Project_Palomar](https://github.com/CiprianRad/Davenport_Project_Palomar). There,
+[Comparator](https://github.com/leanprover/comparator) checks that the main results, restated
+using Mathlib only, are proved here exactly as stated and with the standard axioms only, and
+replays the proofs in Lean's kernel and in the independent NanoDa kernel.
 
 ## The finite computations
 
@@ -238,24 +263,31 @@ cases: 2,209 contain two disjoint zero sets, and 1,137 and 36 receive an explici
 and on seven zero sets. All coefficients are ±1, and the whole check is done by the kernel.
 
 **Lemma 5.3.** The standard basis vectors are chosen among the terms of the support with the
-largest multiplicity.
+largest multiplicity, and the sequences are enumerated as sorted lists of codes, the multiplicity
+normalization being applied while the lists grow.
 
 | | 14 terms | 18 terms |
-|---|---:|---:|
+|---:|---:|---:|
 | Normalized cases | 562,180 | 128,592 |
-| Closed by disjoint zero sets or by a long zero set | 525,719 | 126,240 |
-| Needing a stored certificate | 36,461 | 2,352 |
+| Closed by a long zero set (the complement of at most three terms) | 487,258 | 126,240 |
+| Closed by two disjoint zero sets | 38,461 | |
+| Closed by the certificate of their orbit | 36,461 | 2,352 |
 | Orbits of those under the linear group, as in the paper | 6,963 | 64 |
 
-Of the 6,963 affine certificates, 6,955 have five zero sets and coefficients ±1. The other eight
-representatives have no certificate of that shape. Theirs were found by an exact integer solver
-and have between 7 and 15 zero sets, with coefficients up to 5 in absolute value. Each of the 64
-quadratic certificates has eleven zero sets and coefficients ±1. It is a five-set affine identity
-on the complement of a zero set, lifted by Lemma 2.2(2), just like the example of Section 5.3.
+Both lengths are covered by one enumeration of 6,452,566 nodes, which the kernel checks with
+77,274 certificates: the identity E + F − (E ∪ F) for the 38,461 cases with two disjoint zero sets
+E and F, and the moved orbit certificates for the other 38,813. Of the 6,963 affine certificates, 6,955 have five zero sets and coefficients
+±1. The other eight representatives have no certificate of that shape. Theirs were found by an
+exact integer solver and have between 7 and 15 zero sets, with coefficients up to 5 in absolute
+value. Each of the 64 quadratic certificates has eleven zero sets and coefficients ±1. It is a
+five-set affine identity on the complement of a zero set, lifted by Lemma 2.2(2), just like the
+example of Section 5.3. Every case receives the certificate of its orbit representative, moved by a
+linear map.
 
-The programs that produced the tables are in [`scripts/l53/`](scripts/l53), with instructions for
-running them again. On the way they recover two numbers of Table 3 of the paper, the 24,445,377
-and 1,267,272 sequences with a fixed support basis.
+The programs that produced the certificates and the chunk modules are in
+[`scripts/l53/`](scripts/l53), with instructions for running them again; they regenerate the
+modules exactly. On the way they recover two numbers of Table 3 of the paper, the 24,445,377 and
+1,267,272 sequences with a fixed support basis.
 
 ## Layout
 
@@ -268,15 +300,29 @@ and 1,267,272 sequences with a fixed support basis.
 | [`DavenportProject/Bases/`](DavenportProject/Bases) | Section 5: the cubes C₂³, C₃³ (Lemmas 5.1 and 5.2) and C₄³ (Lemma 5.3) |
 | [`DavenportProject/Examples/`](DavenportProject/Examples) | the eighteen-term example of Section 5.3 |
 | [`DavenportProject/TheoremB.lean`](DavenportProject/TheoremB.lean), [`CorollaryC.lean`](DavenportProject/CorollaryC.lean) | Theorem B, and Section 6 with Corollary C and the numerical values |
-| [`DavenportCompute/`](DavenportCompute) | the computation library of Lemma 5.3 |
+| [`DavenportCompute/`](DavenportCompute) | the computation of Lemma 5.3, written for the kernel, and its kernel checks |
+| [`DavenportProject/Bases/CubeFour/Search*.lean`](DavenportProject/Bases/CubeFour), [`Checks.lean`](DavenportProject/Bases/CubeFour/Checks.lean) | the soundness of that computation |
 | [`statements.json`](statements.json), [`scripts/check_statements.py`](scripts/check_statements.py) | the check of the statements and of their axioms |
-| [`scripts/l53/`](scripts/l53) | the programs that generated the certificate tables of Lemma 5.3 |
+| [`scripts/l53/`](scripts/l53) | the programs that generated the certificates of Lemma 5.3 |
+| [`supplement.pdf`](supplement.pdf) | the supplement to the paper: certificate counts, the eighteen-term example, replaying the checks |
 | [`.github/workflows/`](.github/workflows) | continuous integration: the build and the statement check |
+
+## How this was made
+
+The formalization was written with Claude Code (Claude Opus 5.5) and the
+[LeanAutoformalizationSkills](https://github.com/scottnarmstrong/LeanAutoformalizationSkills) skill
+collection, under the supervision of the authors; the agents it launched may have used other
+Anthropic or OpenAI models. As stated in the paper, large language models (OpenAI's Codex and
+ChatGPT, Anthropic's Claude) were used in an essential way for this work. The authors checked the
+formal statements against the paper and take responsibility for the formalization. The details are
+in the [`formalization.yaml`](https://github.com/CiprianRad/Davenport_Project_Palomar/blob/main/formalization.yaml)
+of Davenport_Project_Palomar.
 
 ## License and citation
 
 The code is released under the Apache License 2.0, see [`LICENSE`](LICENSE). If you use it,
-please cite the paper; the details are in [`CITATION.cff`](CITATION.cff).
+please cite the paper, [arXiv:2611.20197](https://arxiv.org/abs/2611.20197); the details are in
+[`CITATION.cff`](CITATION.cff).
 
 If something here is unclear, or a statement does not say what you expected it to say, we would
 like to know. Please open an issue.

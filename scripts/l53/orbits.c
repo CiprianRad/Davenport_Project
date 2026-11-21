@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Claudiu G. Pop, George C. Rad, George C. Țurcaș. All rights reserved.
 // SPDX-License-Identifier: Apache-2.0
 // Read lines of N codes (optionally prefixed by a tag letter), compute canonical form = lex-min sorted image
 // over all ordered support bases (odd det) mapped to (e1,e2,e3). Print number of distinct canonical forms.

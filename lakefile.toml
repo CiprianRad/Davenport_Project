@@ -18,8 +18,7 @@ rev = "d6b19107529f14ba04640221cf560d767c81c8e9"
 [[lean_lib]]
 name = "DavenportProject"
 
-# Native computations of Lemma 5.3. Mathlib-free and compiled to native
-# code, so that `native_decide` runs them at native speed.
+# The computation of Lemma 5.3, checked by the kernel. Mathlib-free, so that
+# its many kernel checks run with a small environment.
 [[lean_lib]]
 name = "DavenportCompute"
-precompileModules = true

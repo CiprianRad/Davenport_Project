@@ -6,5 +6,5 @@ Authors: Claudiu G. Pop, George C. Rad, George C. Țurcaș
 module
 
 public import DavenportCompute.Basic
-public import DavenportCompute.Data
-public import DavenportCompute.Oracle
+public import DavenportCompute.Search
+public import DavenportCompute.Checks.Roots
