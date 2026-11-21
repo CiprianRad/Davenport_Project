@@ -1,7 +1,7 @@
 name = "Davenport_Project"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["DavenportProject", "Challenge", "Solution"]
+defaultTargets = ["DavenportProject"]
 
 [leanOptions]
 pp.unicode.fun = true # pretty-prints `fun a ↦ b`
@@ -22,10 +22,3 @@ name = "DavenportProject"
 # its many kernel checks run with a small environment.
 [[lean_lib]]
 name = "DavenportCompute"
-
-# The statements submitted to Comparator (Mathlib only) and their proofs.
-[[lean_lib]]
-name = "Challenge"
-
-[[lean_lib]]
-name = "Solution"

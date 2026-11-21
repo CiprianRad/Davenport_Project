@@ -14,7 +14,7 @@ authors:
   - given-names: George C.
     family-names: Țurcaș
 license: Apache-2.0
-repository-code: https://github.com/CiprianRad/Davenport_Project_Palomar
+repository-code: https://github.com/CiprianRad/Davenport_Project
 keywords:
   - Lean 4
   - Mathlib

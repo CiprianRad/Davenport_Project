@@ -1,7 +1,6 @@
 # Davenport constants in rank three, formalized in Lean 4
 
-[![CI](https://github.com/CiprianRad/Davenport_Project_Palomar/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/CiprianRad/Davenport_Project_Palomar/actions/workflows/lean_action_ci.yml)
-[![Comparator](https://github.com/CiprianRad/Davenport_Project_Palomar/actions/workflows/comparator.yml/badge.svg)](https://github.com/CiprianRad/Davenport_Project_Palomar/actions/workflows/comparator.yml)
+[![CI](https://github.com/CiprianRad/Davenport_Project/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/CiprianRad/Davenport_Project/actions/workflows/lean_action_ci.yml)
 
 This repository is the Lean 4 companion of the paper
 
@@ -48,7 +47,7 @@ Most visitors come with one of these questions.
 - *How do I run it?* See [Building and checking](#building-and-checking).
 - *What exactly did the computer compute?* See
   [The finite computations](#the-finite-computations).
-- *What is submitted to the Palomar registry?* See [Palomar and Comparator](#palomar-and-comparator).
+- *Where is the version for the Palomar registry?* See [Palomar and Comparator](#palomar-and-comparator).
 - *Where is the file I am looking for?* See [Layout](#layout).
 
 ## Reading the statements
@@ -202,11 +201,10 @@ things. It compares a hash of the fully elaborated statement with the recorded o
 statement can change unnoticed. And it checks that the proof depends only on the three standard
 axioms of Lean: `propext`, `Classical.choice` and `Quot.sound`.
 
-All 76 pass, Lemma 5.3, Theorem B and Corollary C included. Apart from the deliberate holes of
-[`Challenge.lean`](Challenge.lean) (see [Palomar and Comparator](#palomar-and-comparator)) there is
-no `sorry`, there is no axiom of our own, and there is no `native_decide`: nothing compiled is
-trusted. The finite parts of Lemma 5.1(1),
-Lemma 5.3 and the worked example are evaluated by Lean's kernel (`decide +kernel`).
+All 76 pass, Lemma 5.3, Theorem B and Corollary C included. There is no `sorry`, there is no
+axiom of our own, and there is no `native_decide`: nothing compiled is trusted. The finite parts
+of Lemma 5.1(1), Lemma 5.3 and the worked example are evaluated by Lean's kernel
+(`decide +kernel`).
 
 For Lemma 5.3 the computation is large, so it is written for the kernel and split into many
 checks:
@@ -244,41 +242,17 @@ The toolchain is `leanprover/lean4:v4.36.0-rc1` (see [`lean-toolchain`](lean-too
 Mathlib is pinned in [`lake-manifest.json`](lake-manifest.json). The kernel checks of Lemma 5.3
 take about 45 minutes of processor time in all, about ten minutes on four cores, and each needs at
 most about two gigabytes of memory. On a machine with little memory, limit the number of parallel
-jobs, for example `LEAN_NUM_THREADS=4 lake build`. `lake build` also compiles `Challenge.lean`,
-whose ten deliberate `sorry`s are reported as warnings. The last command should end with
+jobs, for example `LEAN_NUM_THREADS=4 lake build`. The last command should end with
 `76 declarations, 0 failure(s)`.
 
 ## Palomar and Comparator
 
-The repository is laid out for the [Palomar registry](https://palomar-registry.org) of
-Lean-verified results.
-
-- [`Challenge.lean`](Challenge.lean) states the main results using Mathlib only: Theorem A (both
-  forms), Theorem B (`hasIncidenceIdentity_cube`, `kappa_cube_le`, `kappa_cube_eq`), Corollary C
-  (`davenport_zmod_prod_three`) and D(C₁₅³) = 43, D(C₂₀³) = 58. The definitions they need are
-  copied verbatim from [`Defs.lean`](DavenportProject/Defs.lean) and
-  [`Invariants.lean`](DavenportProject/Invariants.lean), and the two theorems that make `davenport`
-  and `kappa` well defined are stated with `sorry` there as well.
-- [`Solution.lean`](Solution.lean) imports the formalization, which proves all of them under the
-  same names.
-- [`comparator.json`](comparator.json) lists the compared theorems and the permitted axioms.
-- [`formalization.yaml`](formalization.yaml) describes the project, its source and how it was
-  made.
-
-[Comparator](https://github.com/leanprover/comparator) checks that the solution proves exactly the
-statements of the challenge, using only the permitted axioms, and replays the exported proofs in
-Lean's kernel and in the independent NanoDa kernel bundled with the toolchain. It runs in a sandbox
-and needs [bubblewrap](https://github.com/containers/bubblewrap):
-
-```sh
-scripts/verify_comparator.sh
-```
-
-The script runs `lake comparator` with NanoDa registered as an external kernel, as Palomar does.
-After the build, the run takes about 45 minutes on four cores (NanoDa about ten minutes, Lean's
-kernel about half an hour) and needs less than 3 GB of memory. Palomar's own verification also
-tries the con-ron kernel, which is advisory there; on this project con-ron needs more than the 30
-minutes Palomar allows it, so Palomar records it as declined for lack of time.
+The same formalization, with the files for the [Palomar registry](https://palomar-registry.org)
+of Lean-verified results, is in the repository
+[Davenport_Project_Palomar](https://github.com/CiprianRad/Davenport_Project_Palomar). There,
+[Comparator](https://github.com/leanprover/comparator) checks that the main results, restated
+using Mathlib only, are proved here exactly as stated and with the standard axioms only, and
+replays the proofs in Lean's kernel and in the independent NanoDa kernel.
 
 ## The finite computations
 
@@ -328,8 +302,7 @@ modules exactly. On the way they recover two numbers of Table 3 of the paper, th
 | [`DavenportProject/Bases/CubeFour/Search*.lean`](DavenportProject/Bases/CubeFour), [`Checks.lean`](DavenportProject/Bases/CubeFour/Checks.lean) | the soundness of that computation |
 | [`statements.json`](statements.json), [`scripts/check_statements.py`](scripts/check_statements.py) | the check of the statements and of their axioms |
 | [`scripts/l53/`](scripts/l53) | the programs that generated the certificates of Lemma 5.3 |
-| [`Challenge.lean`](Challenge.lean), [`Solution.lean`](Solution.lean), [`comparator.json`](comparator.json), [`formalization.yaml`](formalization.yaml) | the Palomar submission |
-| [`.github/workflows/`](.github/workflows) | continuous integration: the build and the statement check, Comparator, and Palomar's own preflight |
+| [`.github/workflows/`](.github/workflows) | continuous integration: the build and the statement check |
 
 ## How this was made
 
@@ -339,7 +312,8 @@ collection, under the supervision of the authors; the agents it launched may hav
 Anthropic or OpenAI models. As stated in the paper, large language models (OpenAI's Codex and
 ChatGPT, Anthropic's Claude) were used in an essential way for this work. The authors checked the
 formal statements against the paper and take responsibility for the formalization. The details are
-in [`formalization.yaml`](formalization.yaml).
+in the [`formalization.yaml`](https://github.com/CiprianRad/Davenport_Project_Palomar/blob/main/formalization.yaml)
+of Davenport_Project_Palomar.
 
 ## License and citation
 
